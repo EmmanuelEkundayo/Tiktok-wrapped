@@ -72,7 +72,12 @@ function showSlide(index) {
     currentSlide = index;
     const viewport = document.getElementById('slides-viewport');
     viewport.innerHTML = '';
-    
+
+    // Hide tap-zones on the UPLOAD slide so the file input is clickable
+    const tapZones = document.getElementById('tap-zones');
+    const isUploadSlide = (index === 0 && !wrappedData.hasLoaded);
+    if (tapZones) tapZones.style.display = isUploadSlide ? 'none' : 'flex';
+
     // Update progress bar
     for (let i = 0; i < totalSlides; i++) {
         const seg = document.getElementById(`seg-${i}`);
@@ -83,11 +88,11 @@ function showSlide(index) {
     slideEl.className = 'slide active';
     slideEl.innerHTML = renderSlideContent(index);
     viewport.appendChild(slideEl);
-    
-    // Re-attach upload listener if it's the upload slide
-    if (index === 0 && !wrappedData.hasLoaded) {
+
+    // Attach upload listener AFTER innerHTML is set
+    if (isUploadSlide) {
         const input = document.getElementById('zip-upload');
-        if (input) input.onchange = handleFileUpload;
+        if (input) input.addEventListener('change', handleFileUpload);
     }
 }
 
