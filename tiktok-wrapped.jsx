@@ -11,6 +11,7 @@ const SLIDES = [
   { id: "busiest" },
   { id: "following" },
   { id: "journey" },
+  { id: "yearly" },
   { id: "personality" },
   { id: "final" },
 ];
@@ -280,10 +281,42 @@ function SlideUpload({ onDataParsed, onNext }) {
           }
       }
 
-      // Determine Personality Persona
-      if (data.totalWatches > 10000) data.personality = "The Scroll-a-holic";
-      else if (data.totalComments > 500) data.personality = "The Social Butterfly";
-      else data.personality = "The Zen Viewer";
+      // 7. Yearly Stats Aggregator
+      const yearlyData = {};
+      const incrementYearly = (dateStr, type) => {
+          if (!dateStr) return;
+          const y = new Date(dateStr).getFullYear();
+          if (isNaN(y)) return;
+          if (!yearlyData[y]) yearlyData[y] = { likes: 0, comments: 0, reposts: 0 };
+          yearlyData[y][type]++;
+      };
+
+      // Recalculate yearly from scratch for accuracy
+      if (commentsFile) {
+          const content = await zip.files[commentsFile].async("string");
+          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+          blocks.forEach(b => {
+              const dateStr = b.match(/Date:\s*(.*)/)?.[1];
+              if (dateStr) incrementYearly(dateStr, 'comments');
+          });
+      }
+      if (likesFile) {
+          const content = await zip.files[likesFile].async("string");
+          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+          blocks.forEach(b => {
+              const dateStr = b.match(/Date:\s*(.*)/)?.[1];
+              if (dateStr) incrementYearly(dateStr, 'likes');
+          });
+      }
+      if (repostsFile) {
+          const content = await zip.files[repostsFile].async("string");
+          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+          blocks.forEach(b => {
+              const dateStr = b.match(/Creation Time:\s*(.*)/)?.[1];
+              if (dateStr) incrementYearly(dateStr, 'reposts');
+          });
+      }
+      data.yearlyData = Object.entries(yearlyData).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
 
       onDataParsed(data);
       onNext();
@@ -626,11 +659,38 @@ function SlideJourney({ data }) {
       <h2 style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1.2, marginBottom: 32 }}>
         Since {data.joinYear}
       </h2>
-      <div style={{ ...glassStyle, padding: "40px() 20px" }}>
+      <div style={{ ...glassStyle, padding: "40px 20px" }}>
         <div style={{ fontSize: 24, fontWeight: 900, color: "#fff" }}>The Journey Started</div>
         <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, marginTop: 16 }}>
           You've seen trends come and go, but your style is eternal.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function SlideYearly({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "60px 20px 0", height: "100%", overflowY: "auto" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 16 }}>
+        Timeline ⏳
+      </p>
+      <h2 style={{ fontSize: 28, fontWeight: 900, color: "#fff", marginBottom: 24 }}>
+        A Year by Year Look
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 40 }}>
+        {data.yearlyData && data.yearlyData.map((y, i) => (
+          <div key={y.year} style={{...glassStyle, padding: "16px", maxWidth: "none"}}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <span style={{ fontSize: 20, fontWeight: 900, color: "#fff" }}>{y.year}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-around", fontSize: 13 }}>
+              <div style={{ color: "rgba(255,255,255,0.7)" }}>❤️ <strong>{y.likes.toLocaleString()}</strong></div>
+              <div style={{ color: "rgba(255,255,255,0.7)" }}>🗣️ <strong>{y.comments.toLocaleString()}</strong></div>
+              <div style={{ color: "rgba(255,255,255,0.7)" }}>🔄 <strong>{y.reposts.toLocaleString()}</strong></div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -663,6 +723,7 @@ const SLIDE_COMPONENTS = {
     busiest: SlideBusiest,
     following: SlideFollowing,
     journey: SlideJourney,
+    yearly: SlideYearly,
     personality: SlidePersonality,
     final: SlideFinal,
 };

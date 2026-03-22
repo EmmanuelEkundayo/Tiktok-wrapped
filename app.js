@@ -181,6 +181,42 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
             data.personalityDesc = "You watch, you enjoy, you keep it simple.";
         }
 
+        // 7. Yearly Stats Aggregator
+        const yearlyDataMap = {};
+        const incYearly = (dateStr, type) => {
+            if (!dateStr) return;
+            const y = new Date(dateStr).getFullYear();
+            if (isNaN(y)) return;
+            if (!yearlyDataMap[y]) yearlyDataMap[y] = { likes: 0, comments: 0, reposts: 0 };
+            yearlyDataMap[y][type]++;
+        };
+
+        if (commentsFile) {
+            const content = await zip.files[commentsFile].async("string");
+            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+            blocks.forEach(b => {
+                const dMatch = b.match(/Date:\s*(.*)/);
+                if (dMatch) incYearly(dMatch[1], 'comments');
+            });
+        }
+        if (likesFile) {
+            const content = await zip.files[likesFile].async("string");
+            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+            blocks.forEach(b => {
+                const dMatch = b.match(/Date:\s*(.*)/);
+                if (dMatch) incYearly(dMatch[1], 'likes');
+            });
+        }
+        if (repostsFile) {
+            const content = await zip.files[repostsFile].async("string");
+            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+            blocks.forEach(b => {
+                const dMatch = b.match(/Creation Time:\s*(.*)/);
+                if (dMatch) incYearly(dMatch[1], 'reposts');
+            });
+        }
+        data.yearlyData = Object.entries(yearlyDataMap).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
+
         wrappedData = data;
         status.innerText = "Data processed successfully!";
         startBtn.style.display = "inline-block";
@@ -283,6 +319,30 @@ function initializeData() {
     document.getElementById('join-year-display').innerText = wrappedData.joinYear || "2021";
     document.getElementById('personality-name').innerText = wrappedData.personality || "The Wrapped Explorer";
     document.getElementById('personality-desc').innerText = wrappedData.personalityDesc || "You've found your digital groove.";
+
+    // Yearly Timeline
+    const timelineContainer = document.getElementById('yearly-timeline-container');
+    if (timelineContainer && wrappedData.yearlyData) {
+        timelineContainer.innerHTML = '';
+        wrappedData.yearlyData.forEach(y => {
+            const item = document.createElement('div');
+            item.className = 'glass-panel';
+            item.style.padding = '1rem';
+            item.style.marginBottom = '0.5rem';
+            item.style.width = '100%';
+            item.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.25rem; font-weight: 900;">${y.year}</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                    <span>❤️ <strong>${y.likes.toLocaleString()}</strong></span>
+                    <span>🗣️ <strong>${y.comments.toLocaleString()}</strong></span>
+                    <span>🔄 <strong>${y.reposts.toLocaleString()}</strong></span>
+                </div>
+            `;
+            timelineContainer.appendChild(item);
+        });
+    }
 
     // Summary screen
     document.getElementById('sum-watches').innerText = wrappedData.stats.totalWatches.toLocaleString();
