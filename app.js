@@ -1,65 +1,349 @@
-let wrappedData = null;
+/**
+ * TikTok Wrapped 2026 - Vanilla JS Port
+ * Logic cloned from tiktok-wrapped.jsx
+ */
 
-// File Upload Handler
-document.getElementById('zip-upload').addEventListener('change', async (e) => {
+const DEFAULT_DATA = {
+    username: "@User",
+    name: "User",
+    joinYear: "2021",
+    totalComments: 0,
+    totalLikes: 0,
+    following: 0,
+    totalReposts: 0,
+    totalRepostHours: 0,
+    totalWatches: 0,
+    totalWatchHours: 0,
+    topEmojis: [],
+    topWords: [],
+    busiestDay: "N/A",
+    busiestDayCount: 0,
+    yearlyData: [],
+    firstComment: null,
+    firstLike: null,
+    firstRepost: null,
+    personality: "The Wrapped Explorer",
+    personalityDesc: "You're about to see your TikTok year in a whole new light."
+};
+
+let wrappedData = { ...DEFAULT_DATA };
+let currentSlide = 0;
+const totalSlides = 13; // intro + 11 stats slides + final
+
+// 1. Initial UI Setup
+function init() {
+    createProgressSegments();
+    setupNavigation();
+    showSlide(0);
+}
+
+function createProgressSegments() {
+    const container = document.getElementById('progress-container');
+    container.innerHTML = '';
+    for (let i = 0; i < totalSlides; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment';
+        seg.id = `seg-${i}`;
+        container.appendChild(seg);
+    }
+}
+
+function setupNavigation() {
+    document.getElementById('tap-left').onclick = () => prevSlide();
+    document.getElementById('tap-right').onclick = () => nextSlide();
+}
+
+function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        showSlide(currentSlide);
+    }
+}
+
+function prevSlide() {
+    if (currentSlide > 0) {
+        currentSlide--;
+        showSlide(currentSlide);
+    }
+}
+
+// 2. Slide Rendering Engine
+function showSlide(index) {
+    currentSlide = index;
+    const viewport = document.getElementById('slides-viewport');
+    viewport.innerHTML = '';
+    
+    // Update progress bar
+    for (let i = 0; i < totalSlides; i++) {
+        const seg = document.getElementById(`seg-${i}`);
+        if (seg) seg.classList.toggle('active', i <= index);
+    }
+
+    const slideEl = document.createElement('div');
+    slideEl.className = 'slide active';
+    slideEl.innerHTML = renderSlideContent(index);
+    viewport.appendChild(slideEl);
+    
+    // Re-attach upload listener if it's the upload slide
+    if (index === 0 && !wrappedData.hasLoaded) {
+        const input = document.getElementById('zip-upload');
+        if (input) input.onchange = handleFileUpload;
+    }
+}
+
+function renderSlideContent(index) {
+    const d = wrappedData;
+    
+    // Slide 0: Upload / Intro
+    if (index === 0) {
+        if (!d.hasLoaded) {
+            return `
+                <div class="glass-panel animate-up">
+                    <div style="font-size: 56px; margin-bottom: 16px">📊</div>
+                    <h2>Upload Your Data</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px">Select your TikTok export ZIP file to begin.</p>
+                    <label class="btn-primary">
+                        Choose ZIP File
+                        <input type="file" id="zip-upload" accept=".zip" style="display: none">
+                    </label>
+                    <div id="upload-status" style="margin-top: 16px; font-size: 13px"></div>
+                </div>
+            `;
+        }
+        return `
+            <div class="animate-up">
+                <div style="font-size: 64px; margin-bottom: 24px">🌑</div>
+                <div class="caption">${d.username}</div>
+                <h1>Your TikTok<br>Wrapped</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 40px">A deep dive into your digital footprints.</p>
+                <button class="btn-secondary" onclick="nextSlide()">Begin the tour 👁️</button>
+            </div>
+        `;
+    }
+
+    // Slide 1: Primary Metrics
+    if (index === 1) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Metrics 🎞️</div>
+                <h2>Your commentary count</h2>
+                <div style="font-size: 88px; font-weight: 900; margin-bottom: 8px">${d.totalComments.toLocaleString()}</div>
+                <p style="color: var(--text-secondary); margin-bottom: 32px">comments dropped 💬</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${d.totalLikes.toLocaleString()}</div>
+                        <div class="stat-label">Videos Liked 🤍</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${d.totalWatches.toLocaleString()}</div>
+                        <div class="stat-label">Videos Watched 👁️</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 2: Emojis
+    if (index === 2) {
+        const emojisHtml = d.topEmojis.map((e, i) => `
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px">
+                <span style="font-size: 32px; width: 40px">${e.emoji}</span>
+                <div style="flex: 1; background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden">
+                    <div style="width: ${i === 0 ? 100 : (e.count / d.topEmojis[0].count * 100)}%; background: #fff; height: 100%"></div>
+                </div>
+                <span style="font-size: 12px; color: var(--text-secondary)">${e.count}</span>
+            </div>
+        `).join('');
+        return `
+            <div class="animate-up" style="width: 100%">
+                <div class="caption">Vibes 🎭</div>
+                <h2>Your top reactions</h2>
+                <div style="max-width: 320px; margin: 32px auto 0; text-align: left">
+                    ${emojisHtml || '<p>No emoji data found</p>'}
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 3: Best Friend
+    if (index === 3) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Circle ⭕</div>
+                <h2>Your TikTok Soulmate</h2>
+                <div class="glass-panel" style="margin: 32px 0">
+                    <div style="font-size: 3rem; font-weight: 900">${d.topWords[0] || '...'}</div>
+                </div>
+                <p style="color: var(--text-secondary)">You've mentioned them enough to make it official.</p>
+            </div>
+        `;
+    }
+
+    // Slide 4: Lexicon
+    if (index === 4) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Lexicon 🗣️</div>
+                <h2>Words that defined your era</h2>
+                <div class="glass-panel" style="margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center">
+                    ${d.topWords.map((w, i) => `<span style="font-size: ${24 - i*2}px; font-weight: 700; opacity: ${1 - i*0.1}">${w}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 5: Chaos (Busiest Day)
+    if (index === 5) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Chaos 📅</div>
+                <h2>Your most active day</h2>
+                <div class="glass-panel" style="margin-top: 32px; padding: 40px 24px">
+                    <div style="font-size: 40px; font-weight: 900">${d.busiestDay}</div>
+                    <div style="font-size: 20px; margin-top: 12px; opacity: 0.7"><strong>${d.busiestDayCount} comments</strong> in 24h</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 6: Following/Reposts
+    if (index === 6) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Network 📶</div>
+                <h2>Keeping Up</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${d.following.toLocaleString()}</div>
+                        <div class="stat-label">Following</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${d.totalReposts.toLocaleString()}</div>
+                        <div class="stat-label">Reposts</div>
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); margin-top: 32px">You're a curator of the highest order.</p>
+            </div>
+        `;
+    }
+
+    // Slide 7: Legacy (Join Year)
+    if (index === 7) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Legacy 🏛️</div>
+                <h2>Since ${d.joinYear}</h2>
+                <div class="glass-panel" style="margin-top: 32px; padding: 40px 24px">
+                    <div style="font-size: 24px; font-weight: 900">The Journey Started</div>
+                    <p style="color: var(--text-secondary); margin-top: 16px">You've seen trends come and go, but your style is eternal.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 8: Yearly Growth
+    if (index === 8) {
+        const yearlyHtml = d.yearlyData.map(y => `
+            <div class="stat-card" style="margin-bottom: 12px; text-align: left">
+                <div style="font-size: 18px; font-weight: 900; margin-bottom: 8px">${y.year}</div>
+                <div style="display: flex; gap: 16px; font-size: 12px; opacity: 0.8">
+                    <span>❤️ ${y.likes}</span>
+                    <span>🗣️ ${y.comments}</span>
+                    <span>🔄 ${y.reposts}</span>
+                </div>
+            </div>
+        `).join('');
+        return `
+            <div class="animate-up" style="width: 100%; max-height: 80vh; overflow-y: auto">
+                <div class="caption">Timeline ⏳</div>
+                <h2 style="margin-bottom: 24px">A Year by Year Look</h2>
+                ${yearlyHtml || '<p>Searching history...</p>'}
+            </div>
+        `;
+    }
+
+    // Slide 9: Milestones
+    if (index === 9) {
+        return `
+            <div class="animate-up" style="width: 100%">
+                <div class="caption">Milestones ✨</div>
+                <h2 style="margin-bottom: 32px">Where it all began</h2>
+                <div style="display: flex; flex-direction: column; gap: 16px">
+                    ${d.firstLike ? `
+                        <a href="${d.firstLike.link}" target="_blank" class="glass-panel" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center; padding: 20px">
+                            <span style="color: #fff; font-weight: 700">❤️ First Like</span>
+                            <span style="color: var(--text-secondary); font-size: 12px">${new Date(d.firstLike.date).toLocaleDateString()}</span>
+                        </a>
+                    ` : ''}
+                    ${d.firstComment ? `
+                        <div class="glass-panel" style="text-align: left; padding: 20px">
+                            <div class="caption" style="font-size: 10px; margin-bottom: 8px">💬 First Comment</div>
+                            <div style="font-style: italic; font-size: 14px">"${d.firstComment.text}"</div>
+                            <div style="color: var(--text-secondary); font-size: 10px; margin-top: 8px">${new Date(d.firstComment.date).toLocaleDateString()}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Slide 10: Personality
+    if (index === 10) {
+        return `
+            <div class="animate-up">
+                <div class="caption">Identity 🧬</div>
+                <div style="font-size: 80px; margin-bottom: 16px">🌌</div>
+                <h2>${d.personality}</h2>
+                <p style="color: var(--text-secondary); font-size: 18px">${d.totalWatchHours.toLocaleString()} hours of content later, you've found your digital groove.</p>
+            </div>
+        `;
+    }
+
+    // Slide 11: Summary / End
+    if (index === 11) {
+        return `
+            <div class="animate-up">
+                <div style="font-size: 64px; margin-bottom: 24px">🏁</div>
+                <h2>That's a wrap,<br>${d.name}!</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 40px">You've dropped ${d.totalComments.toLocaleString()} comments and liked ${d.totalLikes.toLocaleString()} videos. You define the culture.</p>
+                <div class="glass-panel" style="padding: 20px">
+                    <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px">YOUR 2026 TIKTOK WRAPPED</div>
+                    <div style="font-weight: 900">${d.username}</div>
+                </div>
+                <button class="btn-secondary" style="margin-top: 40px" onclick="showSlide(0)">Replay 🔄</button>
+            </div>
+        `;
+    }
+    
+    return '';
+}
+
+// 3. Data Parsing Engine (The Brain)
+async function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const status = document.getElementById('upload-status');
-    const startBtn = document.getElementById('start-btn');
-    const uploadLabel = document.getElementById('upload-label');
-
-    status.innerText = "Processing your TikTok data...";
-    uploadLabel.style.display = "none";
+    status.innerText = "Processing your data...";
 
     try {
-        console.log("Loading ZIP file...");
         const zip = await window.JSZip.loadAsync(file);
-        console.log("ZIP loaded successfully. Files found:", Object.keys(zip.files));
+        const data = { ...DEFAULT_DATA, hasLoaded: true };
         
-        const data = {
-            username: "@User",
-            stats: {
-                totalLikes: 0,
-                totalComments: 0,
-                totalWatches: 0,
-                totalWatchHours: 0,
-                totalReposts: 0,
-                totalRepostHours: 0,
-                following: 0
-            },
-            firsts: {
-                like: null,
-                comment: null,
-                repost: null
-            },
-            monthlyData: {},
-            emojis: [],
-            words: [],
-            busiestDays: [],
-            personality: "The Wrapped Explorer",
-            personalityDesc: "You've found your digital groove.",
-            bestFriend: "...",
-            joinYear: "2021",
-            yearlyData: []
+        const findFile = (pathPart) => {
+            return Object.keys(zip.files).find(f => f.toLowerCase().includes(pathPart.toLowerCase()));
         };
 
-        const findFile = (name) => {
-            const found = Object.keys(zip.files).find(f => f.toLowerCase().includes(name.toLowerCase()));
-            if (found) console.log(`Found file: ${name} -> ${found}`);
-            return found;
-        };
-
-        // 1. Comments
-        console.log("Processing comments...");
+        // Comments
         const commentsFile = findFile("Comments.txt");
         if (commentsFile) {
             const content = await zip.files[commentsFile].async("string");
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            data.stats.totalComments = blocks.length;
+            data.totalComments = blocks.length;
             
             const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
             const emojiCounts = {};
+            const wordCounts = {};
             const dailyComments = {};
 
             blocks.forEach(b => {
@@ -67,9 +351,8 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
                 let dateStr = "";
                 let commentStr = "";
                 lines.forEach(l => {
-                    const line = l.trim();
-                    if (line.startsWith("Date:")) dateStr = line.split(":").slice(1).join(":").trim();
-                    if (line.startsWith("Comment:")) commentStr = line.split(":").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Date:")) dateStr = l.split(":").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Comment:")) commentStr = l.split(":").slice(1).join(":").trim();
                 });
 
                 if (dateStr) {
@@ -79,452 +362,130 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
                         dailyComments[dayKey] = (dailyComments[dayKey] || 0) + 1;
                     }
                 }
+
                 if (commentStr) {
                     const emojis = commentStr.match(emojiRegex);
                     if (emojis) emojis.forEach(e => emojiCounts[e] = (emojiCounts[e] || 0) + 1);
+                    const words = commentStr.toLowerCase().replace(emojiRegex, '').replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+                    words.forEach(w => { if (w.length > 4) wordCounts[w] = (wordCounts[w] || 0) + 1; });
                 }
             });
 
-            data.emojis = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1]).slice(0,5).map(e => ({char: e[0], count: e[1]}));
+            data.topEmojis = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1]).slice(0,5).map(e => ({emoji: e[0], count: e[1]}));
+            data.topWords = Object.entries(wordCounts).sort((a,b) => b[1]-a[1]).slice(0,7).map(w => w[0]);
+            
             let maxC = 0, bDay = "";
             Object.entries(dailyComments).forEach(([d, c]) => { if (c > maxC) { maxC = c; bDay = d; } });
-            if (bDay) data.busiestDays.push({ day: bDay, count: maxC });
+            data.busiestDay = bDay;
+            data.busiestDayCount = maxC;
 
-            let earliestC = Infinity;
+            // First comment
+            let earliest = Infinity;
             blocks.forEach(b => {
                 const lines = b.split('\n');
                 let dStr = "", cStr = "";
                 lines.forEach(l => {
-                    const line = l.trim();
-                    if (line.startsWith("Date:")) dStr = line.split(":").slice(1).join(":").trim();
-                    if (line.startsWith("Comment:")) cStr = line.split(":").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Date:")) dStr = l.split(":").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Comment:")) cStr = l.split(":").slice(1).join(":").trim();
                 });
                 if (dStr) {
-                    const d = new Date(dStr);
-                    if (!isNaN(d.getTime()) && d.getTime() < earliestC) {
-                        earliestC = d.getTime();
-                        data.firsts.comment = { date: dStr, text: cStr };
-                    }
+                    const d = new Date(dStr).getTime();
+                    if (!isNaN(d) && d < earliest) { earliest = d; data.firstComment = { date: dStr, text: cStr }; }
                 }
             });
         }
 
-        // 2. Likes
-        console.log("Processing likes...");
+        // Likes
         const likesFile = findFile("Like List.txt");
         if (likesFile) {
             const content = await zip.files[likesFile].async("string");
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            data.stats.totalLikes = blocks.length;
-
-            let earliestL = Infinity;
+            data.totalLikes = blocks.length;
+            let earliest = Infinity;
             blocks.forEach(b => {
                 const lines = b.split('\n');
                 let dStr = "", lStr = "";
                 lines.forEach(l => {
-                    const line = l.trim();
-                    if (line.startsWith("Date:")) dStr = line.split(":").slice(1).join(":").trim();
-                    if (line.startsWith("Link:")) lStr = line.split("Link:").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Date:")) dStr = l.split(":").slice(1).join(":").trim();
+                    if (l.trim().startsWith("Link:")) lStr = l.split("Link:")[1].trim();
                 });
                 if (dStr) {
-                    const d = new Date(dStr);
-                    if (!isNaN(d.getTime()) && d.getTime() < earliestL) {
-                        earliestL = d.getTime();
-                        data.firsts.like = { date: dStr, link: lStr };
-                    }
+                    const d = new Date(dStr).getTime();
+                    if (!isNaN(d) && d < earliest) { earliest = d; data.firstLike = { date: dStr, link: lStr }; }
                 }
             });
         }
 
-        // 3. Reposts
-        console.log("Processing reposts...");
+        // Reposts
         const repostsFile = findFile("Reposts.txt");
         if (repostsFile) {
             const content = await zip.files[repostsFile].async("string");
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            data.stats.totalReposts = blocks.length;
-            data.stats.totalRepostHours = Math.round((blocks.length * 15) / 3600);
-
-            let earliestR = Infinity;
-            blocks.forEach(b => {
-                const lines = b.split('\n');
-                let dStr = "", lStr = "";
-                lines.forEach(l => {
-                    const line = l.trim();
-                    if (line.startsWith("Creation Time:") || line.startsWith("Date:")) {
-                        dStr = line.split(":").slice(1).join(":").trim();
-                    }
-                    if (line.startsWith("Link:")) lStr = line.split("Link:").slice(1).join(":").trim();
-                });
-                if (dStr) {
-                    const d = new Date(dStr);
-                    if (!isNaN(d.getTime()) && d.getTime() < earliestR) {
-                        earliestR = d.getTime();
-                        data.firsts.repost = { date: dStr, link: lStr };
-                    }
-                }
-            });
+            data.totalReposts = blocks.length;
+            data.totalRepostHours = Math.round((blocks.length * 15) / 3600);
         }
 
-        // 4. Watch History
-        console.log("Processing watch history...");
+        // Watch History
         const watchFile = findFile("Watch History.txt");
         if (watchFile) {
             const content = await zip.files[watchFile].async("string");
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            data.stats.totalWatches = blocks.length;
-            data.stats.totalWatchHours = Math.round((blocks.length * 15) / 3600);
+            data.totalWatches = blocks.length;
+            data.totalWatchHours = Math.round((blocks.length * 15) / 3600);
         }
 
-        // 5. Profile Info
-        console.log("Processing profile info...");
+        // Profile Info
         const profileFile = findFile("Profile Info.txt");
         if (profileFile) {
             const content = await zip.files[profileFile].async("string");
             const uMatch = content.match(/Username:\s*(.*)/);
             if (uMatch) data.username = "@" + uMatch[1].trim();
             const jMatch = content.match(/Registration Date:\s*(.*)/);
-            if (jMatch) {
-                const d = new Date(jMatch[1].trim());
-                if (!isNaN(d.getTime())) data.joinYear = d.getFullYear().toString();
-            }
+            if (jMatch) data.joinYear = new Date(jMatch[1].trim()).getFullYear();
             const fMatch = content.match(/Following:\s*(\d+)/);
-            if (fMatch) data.stats.following = parseInt(fMatch[1], 10);
+            if (fMatch) data.following = parseInt(fMatch[1], 10);
         }
 
-        // 6. Best Friend (from comments)
-        if (commentsFile) {
-             const content = await zip.files[commentsFile].async("string");
-             const wordCounts = {};
-             const words = content.toLowerCase().match(/\b\w{5,}\b/g); 
-             if (words) {
-                 words.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
-                 data.words = Object.entries(wordCounts).sort((a,b) => b[1]-a[1]).slice(0,10).map(([word, count]) => ({word, count}));
-                 data.bestFriend = data.words[0]?.word || "...";
-             }
-        }
-
-        // Personality
-        if (data.stats.totalWatches > 10000) {
-            data.personality = "The Scroll-a-holic";
-            data.personalityDesc = "Your thumb is basically an Olympian at this point.";
-        } else if (data.stats.totalComments > 500) {
-            data.personality = "The Social Butterfly";
-            data.personalityDesc = "TikTok isn't just an app for you, it's a conversation.";
-        } else {
-            data.personality = "The Zen Viewer";
-            data.personalityDesc = "You watch, you enjoy, you keep it simple.";
-        }
-
-        // 7. Yearly Stats Aggregator
-        console.log("Aggregating yearly stats...");
-        const yearlyDataMap = {};
-        const extractDate = (block) => {
-            const m = block.match(/(Date|Creation Time|Timestamp):\s*([\d\-\:\s]+)/i);
-            return m ? m[2].trim() : null;
+        // Yearly Aggregation (Parity Check)
+        const yearlyMap = {};
+        const getYearFromBlock = (b) => {
+            const m = b.match(/(Date|Creation Time|Timestamp):\s*([\d\-\:\s]+)/i);
+            if (m) { const d = new Date(m[2].trim()); if (!isNaN(d.getTime())) return d.getFullYear(); }
+            return null;
         };
-
-        const incYearly = (block, type) => {
-            const dateStr = extractDate(block);
-            if (!dateStr) return;
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return;
-            const y = d.getFullYear();
-            if (!yearlyDataMap[y]) yearlyDataMap[y] = { likes: 0, comments: 0, reposts: 0 };
-            yearlyDataMap[y][type]++;
-        };
-
+        const incYear = (b, type) => { const y = getYearFromBlock(b); if (y) { if (!yearlyMap[y]) yearlyMap[y] = {likes:0,comments:0,reposts:0}; yearlyMap[y][type]++; } };
+        
         if (commentsFile) {
             const content = await zip.files[commentsFile].async("string");
-            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'comments'));
+            content.split(/\n\s*\n/).forEach(b => incYear(b, 'comments'));
         }
         if (likesFile) {
             const content = await zip.files[likesFile].async("string");
-            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'likes'));
+            content.split(/\n\s*\n/).forEach(b => incYear(b, 'likes'));
         }
         if (repostsFile) {
             const content = await zip.files[repostsFile].async("string");
-            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'reposts'));
+            content.split(/\n\s*\n/).forEach(b => incYear(b, 'reposts'));
         }
-        data.yearlyData = Object.entries(yearlyDataMap).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
+        data.yearlyData = Object.entries(yearlyMap).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
 
-        console.log("Data processing complete. Initializing UI...");
+        // Personality
+        if (data.totalWatches > 10000) { data.personality = "The Scroll-a-holic"; data.personalityDesc = "Your thumb is basically an Olympian at this point."; }
+        else if (data.totalComments > 500) { data.personality = "The Social Butterfly"; data.personalityDesc = "TikTok isn't just an app, it's a conversation."; }
+
         wrappedData = data;
-        status.innerText = "Data processed successfully!";
-        startBtn.style.display = "inline-block";
-        initializeData();
+        showSlide(0); // Move to intro slide
 
     } catch (err) {
-        console.error("FATAL ERROR DURING PARSING:", err);
-        status.innerText = `Error: ${err.message || "Something went wrong"}. Check console for details.`;
-        uploadLabel.style.display = "inline-block";
-    }
-});
-
-let currentSlide = 0;
-const totalSlides = 13;
-
-function updateProgress() {
-    const container = document.getElementById('progress-bar-container');
-    if (!container) return;
-    container.innerHTML = '';
-    if (currentSlide === 0) return;
-
-    for (let i = 1; i < totalSlides; i++) {
-        const segment = document.createElement('div');
-        segment.style.flex = '1';
-        segment.style.height = '2px';
-        segment.style.borderRadius = '2px';
-        segment.style.background = i <= currentSlide ? '#fff' : 'rgba(255,255,255,0.2)';
-        segment.style.transition = 'background 0.3s ease';
-        container.appendChild(segment);
+        console.error(err);
+        status.innerText = "Error processing ZIP. Make sure it's the correct TikTok data export.";
     }
 }
 
-function showSlide(index) {
-    if (index < 0 || index >= totalSlides) return;
-    const slides = document.querySelectorAll('.slide');
-    slides.forEach(s => s.classList.remove('active'));
-    const target = document.getElementById(`slide-${index}`);
-    if (target) {
-        target.classList.add('active');
-        currentSlide = index;
-        updateProgress();
-        animateNumbers(target);
-    }
-}
-
-function nextSlide() {
-    showSlide(currentSlide + 1);
-}
-
-function prevSlide() {
-    if (currentSlide > 1) showSlide(currentSlide - 1);
-}
-
-// Global Nav Listeners
-document.getElementById('tap-left')?.addEventListener('click', () => { if (currentSlide > 0) prevSlide(); });
-document.getElementById('tap-right')?.addEventListener('click', () => { if (currentSlide > 0) nextSlide(); });
-
-document.addEventListener('keydown', (e) => {
-    if (wrappedData) {
-        if (e.key === 'ArrowRight') nextSlide();
-        else if (e.key === 'ArrowLeft') prevSlide();
-    }
-});
-
-function animateNumbers(slide) {
-    if (!wrappedData) return;
-    const numberElements = slide.querySelectorAll('.number');
-    numberElements.forEach(el => {
-        const targetKey = el.getAttribute('data-target');
-        const targetValue = wrappedData.stats[targetKey] || 0;
-        let startTimestamp = null;
-        const duration = 2000;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-            el.innerText = Math.floor(easeProgress * targetValue).toLocaleString();
-            if (progress < 1) window.requestAnimationFrame(step);
-        };
-        window.requestAnimationFrame(step);
-    });
-}
-
-function formatDateFriendly(dateStr) {
-    if (!dateStr) return '';
-    try {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    } catch (e) { return dateStr; }
-}
-
-function initializeData() {
-    if (!wrappedData) return;
-
-    const setT = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = (val !== undefined && val !== null) ? val.toLocaleString() : "0";
-    };
-
-    const setH = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = val;
-    };
-
-    // Intro
-    setT('intro-username', wrappedData.username || '@User');
-    setT('intro-name', (wrappedData.username || '@User').replace('@',''));
-    setT('intro-likes', wrappedData.stats.totalLikes);
-    setT('intro-comments', wrappedData.stats.totalComments);
-
-    // Stats Slide
-    setT('stats-total-comments', wrappedData.stats.totalComments);
-    setT('stats-total-likes', wrappedData.stats.totalLikes);
-    setT('stats-total-watch-hours', wrappedData.stats.totalWatchHours);
-    setT('stats-total-repost-hours', wrappedData.stats.totalRepostHours);
-
-    // Emojis
-    const emojiContainer = document.getElementById('emoji-list-container');
-    if (emojiContainer) {
-        emojiContainer.innerHTML = '';
-        (wrappedData.emojis || []).slice(0, 4).forEach((e) => {
-            const div = document.createElement('div');
-            div.className = 'glass-panel';
-            div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; width: 100%; margin: 0; box-sizing: border-box;';
-            div.innerHTML = `
-                <span style="font-size: 2rem;">${e.char}</span>
-                <span style="font-size: 1.25rem; font-weight: 700;">${e.count.toLocaleString()}</span>
-            `;
-            emojiContainer.appendChild(div);
-        });
-    }
-
-    // Best Friend
-    setT('best-friend-name', wrappedData.bestFriend || "...");
-
-    // Words Cloud
-    const wordCloud = document.getElementById('words-cloud-container');
-    if (wordCloud) {
-        wordCloud.innerHTML = '';
-        (wrappedData.words || []).slice(0, 10).forEach(w => {
-            const span = document.createElement('span');
-            span.style.cssText = `font-size: ${1.2 + Math.random()}rem; font-weight: 700; color: rgba(255,255,255,${0.5 + Math.random() * 0.5});`;
-            span.innerText = w.word;
-            wordCloud.appendChild(span);
-        });
-    }
-
-    // Busiest Day
-    if (wrappedData.busiestDays && wrappedData.busiestDays[0]) {
-        setT('busiest-day-name', formatDateFriendly(wrappedData.busiestDays[0].day));
-        setT('busiest-day-count', wrappedData.busiestDays[0].count);
-    }
-
-    // Following
-    setT('stats-following', wrappedData.stats.following);
-    setT('stats-reposts', wrappedData.stats.totalReposts);
-
-    // Journey
-    setT('join-year-display', wrappedData.joinYear || "2021");
-
-    // Timeline
-    const timelineContainer = document.getElementById('yearly-timeline-container');
-    if (timelineContainer && wrappedData.yearlyData) {
-        timelineContainer.innerHTML = '';
-        wrappedData.yearlyData.forEach(y => {
-            const item = document.createElement('div');
-            item.className = 'glass-panel';
-            item.style.cssText = 'padding: 0.75rem; width: 100%; margin: 0; box-sizing: border-box;';
-            item.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 1.1rem; font-weight: 900;">${y.year}</span>
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">🔄 ${y.reposts.toLocaleString()}</span>
-                </div>
-                <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.6);">
-                    <span>❤️ ${y.likes.toLocaleString()}</span>
-                    <span>🗣️ ${y.comments.toLocaleString()}</span>
-                </div>
-            `;
-            timelineContainer.appendChild(item);
-        });
-    }
-
-    // Personality
-    setT('personality-name', wrappedData.personality || "The Wrapped Explorer");
-    setT('personality-desc', wrappedData.personalityDesc || "You've found your digital groove.");
-
-    // Firsts Slide
-    const firstsSlideContainer = document.getElementById('slide-firsts-container');
-    if (firstsSlideContainer) {
-        firstsSlideContainer.innerHTML = '';
-        const firsts = wrappedData.firsts;
-        if (firsts && firsts.like) {
-            const a = document.createElement('a');
-            a.href = firsts.like.link;
-            a.target = '_blank';
-            a.className = 'glass-panel';
-            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 20px; width: 100%; margin: 0; box-sizing: border-box;';
-            a.innerHTML = `<span style="color: #fff; font-weight: 700;">❤️ First Like</span><span style="color: rgba(255,255,255,0.5); font-size: 13px;">${new Date(firsts.like.date).toLocaleDateString()}</span>`;
-            firstsSlideContainer.appendChild(a);
-        }
-        if (firsts && firsts.repost) {
-            const a = document.createElement('a');
-            a.href = firsts.repost.link;
-            a.target = '_blank';
-            a.className = 'glass-panel';
-            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 20px; width: 100%; margin: 0; box-sizing: border-box;';
-            a.innerHTML = `<span style="color: #fff; font-weight: 700;">🔄 First Repost</span><span style="color: rgba(255,255,255,0.5); font-size: 13px;">${new Date(firsts.repost.date).toLocaleDateString()}</span>`;
-            firstsSlideContainer.appendChild(a);
-        }
-        if (firsts && firsts.comment) {
-            const div = document.createElement('div');
-            div.className = 'glass-panel';
-            div.style.cssText = 'text-align: left; padding: 20px; width: 100%; margin: 0; box-sizing: border-box;';
-            div.innerHTML = `
-                <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 8px; text-transform: uppercase;">💬 First Comment</div>
-                <div style="color: #fff; font-size: 15px; font-style: italic; line-height: 1.4;">"${firsts.comment.text}"</div>
-                <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 8px;">${new Date(firsts.comment.date).toLocaleDateString()}</div>
-            `;
-            firstsSlideContainer.appendChild(div);
-        }
-    }
-
-    // Summary screen
-    setT('sum-watches', wrappedData.stats.totalWatches);
-    setT('sum-hours', wrappedData.stats.totalWatchHours);
-    setT('sum-likes', wrappedData.stats.totalLikes);
-    setT('sum-comments', wrappedData.stats.totalComments);
-    setT('sum-reposts', wrappedData.stats.totalReposts);
-    
-    setH('final-summary-text', `
-        You've dropped <strong>${(wrappedData.stats.totalComments || 0).toLocaleString()}</strong> comments 
-        and spent <strong>${(wrappedData.stats.totalWatchHours || 0).toLocaleString()}</strong> hours watching. 
-        You define the culture.
-    `);
-
-    // Firsts on summary
-    const firstsSummary = document.getElementById('firsts-container');
-    if (firstsSummary) {
-        firstsSummary.innerHTML = '';
-        const firsts = wrappedData.firsts;
-        if (firsts && firsts.like) {
-            const a = document.createElement('a');
-            a.href = firsts.like.link;
-            a.target = '_blank';
-            a.className = 'btn';
-            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; font-size: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 100%; box-sizing: border-box;';
-            a.innerHTML = `<span>❤️ Your First Like</span><span style="opacity: 0.5;">${new Date(firsts.like.date).toLocaleDateString()}</span>`;
-            firstsSummary.appendChild(a);
-        }
-    }
-}
-
-// Particles effect
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.particlesJS) {
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 40, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#ffffff" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.2, "random": true },
-                "size": { "value": 3, "random": true },
-                "line_linked": { "enable": false },
-                "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false }
-            },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": { "onhover": { "enable": true, "mode": "bubble" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
-                "modes": { "bubble": { "distance": 200, "size": 4, "duration": 2, "opacity": 1, "speed": 3 }, "push": { "particles_nb": 4 } }
-            },
-            "retina_detect": true
-        });
-    }
-});
-
-// Expose to window for onclick handlers
-window.showSlide = showSlide;
+// Global exposure for onClick handlers
 window.nextSlide = nextSlide;
 window.prevSlide = prevSlide;
+window.showSlide = showSlide;
+
+// Run Init
+window.addEventListener('DOMContentLoaded', init);
