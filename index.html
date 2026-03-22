@@ -16,7 +16,7 @@
     <div class="container" id="slides-container">
 
         <!-- Slide 1: Welcome & Upload -->
-        <section class="slide active" id="slide-1">
+        <section class="slide active" id="slide-0">
             <div class="content glass-panel">
                 <div style="font-size: 4rem; margin-bottom: 1.5rem;">🌑</div>
                 <h1 class="animate-up">Your TikTok<br><span>Wrapped</span></h1>
@@ -30,65 +30,64 @@
                     <p id="upload-status" style="font-size: 0.9rem; margin-top: 1rem; color: #888;"></p>
                 </div>
                 
-                <button class="btn animate-up delay-3" id="start-btn" style="display: none;" onclick="nextSlide(2)">Let's Go</button>
+                <button class="btn animate-up delay-3" id="start-btn" style="display: none;" onclick="showSlide(1)">Start Your Wrapped</button>
             </div>
         </section>
 
-        <!-- Slide 2: The Scroll Machine -->
+        <!-- Slide 1: Intro -->
+        <section class="slide" id="slide-1">
+            <div class="content glass-panel">
+                <h2 class="animate-up">Hey <span id="intro-name">scroller</span>,</h2>
+                <h1 class="animate-up delay-1" id="intro-username">@User</h1>
+                <p class="animate-up delay-2" style="margin-top: 2rem;">You've been busy. You've dropped <strong id="intro-comments">0</strong> comments and liked <strong id="intro-likes">0</strong> videos.</p>
+            </div>
+        </section>
+
+        <!-- Slide 2: Stats -->
         <section class="slide" id="slide-2">
-            <div class="content glass-panel">
-                <h2 class="animate-up">You're a professional scroller.</h2>
-                <div class="metric-container animate-up delay-1">
-                    <p>Total Videos Watched</p>
-                    <h1 class="number" data-target="totalWatches" id="metric-watches">0</h1>
-                    <p style="font-size: 1rem; color: #888;">(<span class="number"
-                            style="font-size: 1.2rem; margin: 0; background: none; -webkit-text-fill-color: var(--primary);"
-                            data-target="totalWatchHours" id="metric-watch-hours">0</span> estimated hours of your life)
-                        🙃</p>
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">The Machine 🤖</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">You're a professional scroller.</h2>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; max-width: 320px; margin: 0 auto;">
+                    <div class="glass-panel">
+                        <div style="font-size: 2.5rem; font-weight: 900;" id="stats-total-likes">0</div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Total Likes</div>
+                    </div>
+                    <div class="glass-panel">
+                        <div style="display: flex; justify-content: center; align-items: baseline; gap: 0.5rem;">
+                            <div style="font-size: 2.5rem; font-weight: 900;" id="stats-total-watch-hours">0</div>
+                            <span style="font-size: 1rem; color: rgba(255,255,255,0.4);">hrs</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Watching Content</div>
+                    </div>
+                    <div class="glass-panel">
+                        <div style="font-size: 2.5rem; font-weight: 900;" id="stats-total-comments">0</div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Comments Made</div>
+                    </div>
                 </div>
-                <button class="btn animate-up delay-2" onclick="nextSlide(3)">Next</button>
             </div>
         </section>
 
-        <!-- Slide 3: Engagement (Likes & Reposts) -->
+        <!-- Slide 3: Emojis -->
         <section class="slide" id="slide-3">
-            <div class="content glass-panel split-layout">
-                <div class="half animate-left">
-                    <h2>Spreading the Love</h2>
-                    <p>Total Likes</p>
-                    <h1 class="number" data-target="totalLikes" id="metric-likes">0</h1>
-                </div>
-                <div class="vertical-divider"></div>
-                <div class="half animate-right delay-1">
-                    <h2>The Share Button MVP</h2>
-                    <p>Total Reposts</p>
-                    <h1 class="number" data-target="totalReposts" id="metric-reposts">0</h1>
-                    <p style="font-size: 0.9rem; color: #888;">(~<span class="number"
-                            style="font-size: 1rem; margin: 0; background: none; -webkit-text-fill-color: var(--secondary);"
-                            data-target="totalRepostHours" id="metric-repost-hours">0</span> hours of content shared)
-                    </p>
-                </div>
-                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(4)">Next</button>
-            </div>
-        </section>
-
-        <!-- Slide 4: Communication -->
-        <section class="slide" id="slide-4">
-            <div class="content glass-panel">
-                <h2 class="animate-up">You always have something to say.</h2>
-                <div class="metric-container animate-up delay-1">
-                    <p>Total Comments</p>
-                    <h1 class="number" data-target="totalComments" id="metric-comments">0</h1>
-                </div>
-                <div class="words-container animate-up delay-2" id="common-words-list">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Vibes ✨</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Your most used emojis</h2>
+                <div id="emoji-list-container" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 320px; margin: 0 auto;">
                     <!-- Injected by JS -->
                 </div>
-                <button class="btn mt-2 animate-up delay-3" onclick="nextSlide(5)">See your emojis</button>
             </div>
-                <p class="animate-up">Circle ⭕</p>
-                <h2 class="animate-up delay-1">Your TikTok Soulmate</h2>
-                <div class="number animate-up delay-2" id="best-friend-name">...</div>
-                <p class="animate-up delay-3">You've mentioned them enough to make it official.</p>
+        </section>
+
+        <!-- Slide 4: Best Friend -->
+        <section class="slide" id="slide-4">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Circle ⭕</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Your TikTok Soulmate</h2>
+                <div class="glass-panel" style="padding: 3rem 1rem;">
+                    <div style="font-size: 3rem; font-weight: 900; letter-spacing: -1px; word-break: break-all;" id="best-friend-name">...</div>
+                </div>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 2rem;">You've mentioned them enough to make it official.</p>
             </div>
         </section>
 
@@ -109,7 +108,7 @@
                 <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Chaos 📅</p>
                 <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Your most active day</h2>
                 <div class="glass-panel" style="padding: 2.5rem 1.25rem;">
-                    <div style="font-size: 3rem; font-weight: 900;" id="busiest-day-name">Loading...</div>
+                    <div style="font-size: 2rem; font-weight: 900;" id="busiest-day-name">Loading...</div>
                     <div style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-top: 0.75rem;">
                         <strong id="busiest-day-count">0</strong> comments in 24h
                     </div>
@@ -122,7 +121,7 @@
             <div class="content">
                 <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Network 📶</p>
                 <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Keeping Up</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 320px; margin: 0 auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 320px; margin: 0 auto; width: 100%;">
                     <div class="glass-panel">
                         <div style="font-size: 2rem; font-weight: 900;" id="stats-following">0</div>
                         <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Following</div>
@@ -148,7 +147,7 @@
 
         <!-- Slide 9: Yearly Timeline -->
         <section class="slide" id="slide-9">
-            <div class="content" style="overflow-y: auto; max-height: 80vh; padding: 2rem 0.5rem;">
+            <div class="content" style="overflow-y: auto; max-height: 80vh; padding: 2rem 0.5rem; width: 100%;">
                 <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Timeline ⏳</p>
                 <h2 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 1.5rem;">A Year by Year Look</h2>
                 <div id="yearly-timeline-container" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
@@ -159,18 +158,15 @@
 
         <!-- Slide 10: Firsts -->
         <section class="slide" id="slide-10">
-            <div class="content">
+            <div class="content" style="width: 100%;">
                 <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Milestones ✨</p>
                 <h2 style="font-size: 2rem; font-weight: 900; margin-bottom: 2rem;">Where it all began</h2>
-                <div id="slide-firsts-container" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                <div id="slide-firsts-container" style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 320px; margin: 0 auto;">
                     <!-- Injected by JS -->
                 </div>
-            </div>
-        </section>
-
-        <!-- Slide 11: Personality -->
+               <!-- Slide 11: Personality -->
         <section class="slide" id="slide-11">
-            <div class="content">
+            <div class="content glass-panel" style="text-align: center;">
                 <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Identity 🧬</p>
                 <div style="font-size: 5rem; margin-bottom: 1.5rem;">🌌</div>
                 <h2 style="font-size: 2.25rem; font-weight: 900; line-height: 1.1; margin-bottom: 1rem;" id="personality-name">The Wrapped Explorer</h2>
@@ -180,24 +176,39 @@
 
         <!-- Slide 12: Summary -->
         <section class="slide" id="slide-12">
-            <div class="content glass-panel summary-panel">
+            <div class="content glass-panel summary-panel" style="max-height: 90vh; overflow-y: auto;">
                 <h1 class="animate-up">That's a Wrap!</h1>
-                <p class="animate-up delay-1" id="final-summary-text" style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
-                    You've dropped 0 comments and liked 0 videos. You define the culture.
+                <p id="final-summary-text" style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+                    You define the culture.
                 </p>
                 
-                <div class="summary-grid animate-up delay-2">
-                    <div class="stat"><span id="sum-watches">0</span><br><small>Watches</small></div>
-                    <div class="stat"><span id="sum-hours">0</span><br><small>Hours</small></div>
-                    <div class="stat"><span id="sum-likes">0</span><br><small>Likes</small></div>
-                    <div class="stat"><span id="sum-comments">0</span><br><small>Comments</small></div>
-                    <div class="stat"><span id="sum-reposts">0</span><br><small>Reposts</small></div>
+                <div class="summary-grid animate-up delay-2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; width: 100%;">
+                    <div class="glass-panel" style="padding: 1rem;"><div style="font-size: 1.5rem; font-weight: 900;" id="sum-watches">0</div><small style="opacity: 0.5;">Watches</small></div>
+                    <div class="glass-panel" style="padding: 1rem;"><div style="font-size: 1.5rem; font-weight: 900;" id="sum-hours">0</div><small style="opacity: 0.5;">Hours</small></div>
+                    <div class="glass-panel" style="padding: 1rem;"><div style="font-size: 1.5rem; font-weight: 900;" id="sum-likes">0</div><small style="opacity: 0.5;">Likes</small></div>
+                    <div class="glass-panel" style="padding: 1rem;"><div style="font-size: 1.5rem; font-weight: 900;" id="sum-comments">0</div><small style="opacity: 0.5;">Comments</small></div>
+                    <div class="glass-panel" style="padding: 1rem; grid-column: span 2;"><div style="font-size: 1.5rem; font-weight: 900;" id="sum-reposts">0</div><small style="opacity: 0.5;">Reposts</small></div>
                 </div>
-                <button class="btn animate-up delay-3" onclick="nextSlide(1)">Replay</button>
+                
+                <div id="firsts-container" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; width: 100%;"></div>
+
+                <button class="btn animate-up delay-3" onclick="showSlide(0)">Replay</button>
             </div>
         </section>
 
     </div>
+
+    <!-- Background Navigation Tap Zones -->
+    <div class="tap-zones" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 5; pointer-events: none;">
+        <div id="tap-left" style="flex: 1; pointer-events: auto; cursor: pointer;"></div>
+        <div id="tap-right" style="flex: 1; pointer-events: auto; cursor: pointer;"></div>
+    </div>
+
+    <!-- Progress Bar at Top -->
+    <div id="progress-bar-container" style="position: fixed; top: 0; left: 0; width: 100%; padding: 10px; display: flex; gap: 4px; z-index: 1000; box-sizing: border-box;"></div>
+
+    <!-- Slide Counter -->
+    <div id="slide-counter" style="position: fixed; bottom: 60px; right: 20px; color: rgba(255,255,255,0.3); font-size: 0.75rem; z-index: 1000;"></div>
 
     <!-- JSZip for parsing TikTok exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -206,6 +217,11 @@
     <script type="module" src="app.js"></script>
     <div style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; z-index: 100;">
         developed by indaCODEski
+    </div>
+</body>
+
+</html>
+daCODEski
     </div>
 </body>
 
