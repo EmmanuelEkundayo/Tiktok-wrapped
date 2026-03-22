@@ -15,12 +15,22 @@
 
     <div class="container" id="slides-container">
 
-        <!-- Slide 1: Welcome -->
+        <!-- Slide 1: Welcome & Upload -->
         <section class="slide active" id="slide-1">
             <div class="content glass-panel">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🌑</div>
                 <h1 class="animate-up">Your TikTok<br><span>Wrapped</span></h1>
-                <p class="animate-up delay-1">Ready to see how much time you spent scrolling?</p>
-                <button class="btn animate-up delay-2" onclick="nextSlide(2)">Let's Go</button>
+                <p class="animate-up delay-1">Upload your TikTok data ZIP to begin your journey.</p>
+                
+                <div class="upload-container animate-up delay-2" style="margin-top: 2rem;">
+                    <label for="zip-upload" class="btn" id="upload-label" style="display: inline-block;">
+                        Choose ZIP File
+                    </label>
+                    <input type="file" id="zip-upload" accept=".zip" style="display: none;">
+                    <p id="upload-status" style="font-size: 0.9rem; margin-top: 1rem; color: #888;"></p>
+                </div>
+                
+                <button class="btn animate-up delay-3" id="start-btn" style="display: none;" onclick="nextSlide(2)">Let's Go</button>
             </div>
         </section>
 
@@ -140,9 +150,14 @@
 
     </div>
 
+    <!-- JSZip for parsing TikTok exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- Particles.js for background effects -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="module" src="app.js"></script>
+    <div style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; z-index: 100;">
+        developed by indaCODEski
+    </div>
 </body>
 
 </html>

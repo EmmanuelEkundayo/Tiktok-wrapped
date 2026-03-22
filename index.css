@@ -6,12 +6,10 @@
 
 :root {
     --bg-color: #000000;
-    --primary: #00f2fe;
-    /* Bright Cyan (TikTok vibe) */
-    --secondary: #fe0979;
-    /* Bright Magenta (TikTok vibe) */
+    --primary: #ffffff;
+    --secondary: #cccccc;
     --text-main: #ffffff;
-    --text-muted: #aaaaaa;
+    --text-muted: #888888;
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
 }
@@ -21,7 +19,6 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     overflow: hidden;
-    /* Hide scrollbars for full screen slides */
     height: 100vh;
     width: 100vw;
 }
@@ -66,28 +63,17 @@ body {
 /* Glassmorphism Panels */
 .glass-panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
+    border-radius: 32px;
     padding: 3rem;
     max-width: 600px;
     width: 90%;
     text-align: center;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
     position: relative;
     overflow: hidden;
-}
-
-/* Gradient borders simulation */
-.glass-panel::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
 }
 
 h1 {
@@ -95,15 +81,12 @@ h1 {
     font-weight: 900;
     line-height: 1.1;
     margin-bottom: 1rem;
-    background: linear-gradient(to right, #fff, #ddd);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #fff;
 }
 
 h1 span {
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
 
 h2 {
@@ -113,7 +96,7 @@ h2 {
 }
 
 p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--text-muted);
     margin-bottom: 2rem;
 }
@@ -122,29 +105,28 @@ p {
     font-size: 5rem;
     font-weight: 900;
     margin: 1rem 0;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0px 4px 15px rgba(0, 242, 254, 0.3);
+    color: #fff;
 }
 
 /* Buttons */
 .btn {
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background: rgba(255,255,255,0.1);
     color: white;
-    border: none;
+    border: 1px solid rgba(255,255,255,0.2);
     padding: 1rem 2.5rem;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
     font-family: inherit;
+    backdrop-filter: blur(10px);
 }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(254, 9, 121, 0.4);
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.4);
 }
 
 .full-width {
