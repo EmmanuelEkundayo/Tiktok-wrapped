@@ -1,0 +1,27 @@
+Suggest your account to contacts: disabled
+Suggest your account to Facebook friends: disabled
+Suggest your account to people who open or send links to you: disabled
+Private Account: Enabled
+Personalised Ads: Enabled
+Who Can Post Comments: Everyone
+Who can reuse content: Only Me
+Who Can Send Me Message: Everyone
+Who Can View Videos I Liked: Myself
+Allow DownLoad: Off
+Filter Comments: Enabled
+
+Push Notification
+New Fans: Default
+New Likes on My Video: Default
+New Comments on My Video: Default
+Desktop notification: Default
+
+Language
+App Language: English
+Web Language: N/A
+
+Content Preferences
+Video Languages Preferences: [#amapiano #wicked]
+Interests: 
+Keyword filters for videos in For You feed: [#amapiano #wicked doechii wicked #muizkah #honorer #capcut #capcutvelocity #viraltiktok #treanding #worldwide #oloricollection #fypシ゚viral #dreamdayuniqueglobalfoods #viralvideo #merciful #spaghetti #nigeriantiktok🇳🇬 #indomie #thatyourfavoritetaylor #rewandmenafrik #halloween #horticulture #pumpkin]
+Keyword filters for videos in Following feed: [#amapiano #wicked]

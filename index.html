@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your TikTok Wrapped 2026</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="container" id="slides-container">
+
+        <!-- Slide 1: Welcome -->
+        <section class="slide active" id="slide-1">
+            <div class="content glass-panel">
+                <h1 class="animate-up">Your TikTok<br><span>Wrapped</span></h1>
+                <p class="animate-up delay-1">Ready to see how much time you spent scrolling?</p>
+                <button class="btn animate-up delay-2" onclick="nextSlide(2)">Let's Go</button>
+            </div>
+        </section>
+
+        <!-- Slide 2: The Scroll Machine -->
+        <section class="slide" id="slide-2">
+            <div class="content glass-panel">
+                <h2 class="animate-up">You're a professional scroller.</h2>
+                <div class="metric-container animate-up delay-1">
+                    <p>Total Videos Watched</p>
+                    <h1 class="number" data-target="totalWatches" id="metric-watches">0</h1>
+                    <p style="font-size: 1rem; color: #888;">(<span class="number"
+                            style="font-size: 1.2rem; margin: 0; background: none; -webkit-text-fill-color: var(--primary);"
+                            data-target="totalWatchHours" id="metric-watch-hours">0</span> estimated hours of your life)
+                        🙃</p>
+                </div>
+                <button class="btn animate-up delay-2" onclick="nextSlide(3)">Next</button>
+            </div>
+        </section>
+
+        <!-- Slide 3: Engagement (Likes & Reposts) -->
+        <section class="slide" id="slide-3">
+            <div class="content glass-panel split-layout">
+                <div class="half animate-left">
+                    <h2>Spreading the Love</h2>
+                    <p>Total Likes</p>
+                    <h1 class="number" data-target="totalLikes" id="metric-likes">0</h1>
+                </div>
+                <div class="vertical-divider"></div>
+                <div class="half animate-right delay-1">
+                    <h2>The Share Button MVP</h2>
+                    <p>Total Reposts</p>
+                    <h1 class="number" data-target="totalReposts" id="metric-reposts">0</h1>
+                    <p style="font-size: 0.9rem; color: #888;">(~<span class="number"
+                            style="font-size: 1rem; margin: 0; background: none; -webkit-text-fill-color: var(--secondary);"
+                            data-target="totalRepostHours" id="metric-repost-hours">0</span> hours of content shared)
+                    </p>
+                </div>
+                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(4)">Next</button>
+            </div>
+        </section>
+
+        <!-- Slide 4: Communication -->
+        <section class="slide" id="slide-4">
+            <div class="content glass-panel">
+                <h2 class="animate-up">You always have something to say.</h2>
+                <div class="metric-container animate-up delay-1">
+                    <p>Total Comments</p>
+                    <h1 class="number" data-target="totalComments" id="metric-comments">0</h1>
+                </div>
+                <div class="words-container animate-up delay-2" id="common-words-list">
+                    <!-- Injected by JS -->
+                </div>
+                <button class="btn mt-2 animate-up delay-3" onclick="nextSlide(5)">See your emojis</button>
+            </div>
+        </section>
+
+        <!-- Slide 5: Top Emojis -->
+        <section class="slide" id="slide-5">
+            <div class="content glass-panel">
+                <h2 class="animate-up">Your favorite reactions.</h2>
+                <div class="emoji-container animate-up delay-1" id="emojis-container">
+                    <!-- Injected by JS -->
+                </div>
+                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(6)">See yearly
+                    breakdown</button>
+            </div>
+        </section>
+
+        <!-- Slide 6: Busiest Days -->
+        <section class="slide" id="slide-6">
+            <div class="content glass-panel">
+                <h2 class="animate-up">Your Busiest Days.</h2>
+                <div class="firsts-grid animate-up delay-1" id="busiest-container">
+                    <!-- Injected by JS -->
+                </div>
+                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(7)">See yearly
+                    breakdown</button>
+            </div>
+        </section>
+
+        <!-- Slide 7: Yearly Breakdown -->
+        <section class="slide" id="slide-7">
+            <div class="content glass-panel yearly-panel">
+                <h2 class="animate-up">A year by year look.</h2>
+                <div class="yearly-grid animate-up delay-1" id="yearly-container">
+                    <!-- Injected by JS -->
+                </div>
+                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(8)">See your firsts</button>
+            </div>
+        </section>
+
+        <!-- Slide 8: The Firsts -->
+        <section class="slide" id="slide-8">
+            <div class="content glass-panel">
+                <h2 class="animate-up">Where it all began.</h2>
+                <div class="firsts-grid animate-up delay-1" id="firsts-container">
+                    <!-- Injected by JS -->
+                </div>
+                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(9)">Finish</button>
+            </div>
+        </section>
+
+        <!-- Slide 9: Summary -->
+        <section class="slide" id="slide-9">
+            <div class="content glass-panel summary-panel">
+                <h1 class="animate-up">That's a Wrap!</h1>
+                <p class="animate-up delay-1">Thanks for sharing your TikTok journey.</p>
+                <div class="summary-grid animate-up delay-2">
+                    <div class="stat"><span id="sum-watches">0</span><br><small>Watches</small></div>
+                    <div class="stat"><span id="sum-likes">0</span><br><small>Likes</small></div>
+                    <div class="stat"><span id="sum-comments">0</span><br><small>Comments</small></div>
+                    <div class="stat"><span id="sum-reposts">0</span><br><small>Reposts</small></div>
+                </div>
+                <button class="btn animate-up delay-3" onclick="nextSlide(1)">Replay</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Particles.js for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
