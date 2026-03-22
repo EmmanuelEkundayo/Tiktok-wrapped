@@ -439,16 +439,25 @@ async function handleFileUpload(e) {
             data.totalWatchHours = Math.round((blocks.length * 15) / 3600);
         }
 
-        // Profile Info
-        const profileFile = findFile("Profile Info.txt");
+        // Profile Info - real filename is "Profile Information.txt"
+        const profileFile = findFile("Profile Information.txt");
         if (profileFile) {
             const content = await zip.files[profileFile].async("string");
-            const uMatch = content.match(/Username:\s*(.*)/);
+            const uMatch = content.match(/Username:\s*(.+)/);
             if (uMatch) data.username = "@" + uMatch[1].trim();
-            const jMatch = content.match(/Registration Date:\s*(.*)/);
-            if (jMatch) data.joinYear = new Date(jMatch[1].trim()).getFullYear();
-            const fMatch = content.match(/Following:\s*(\d+)/);
-            if (fMatch) data.following = parseInt(fMatch[1], 10);
+            const jMatch = content.match(/Registration Date:\s*(.+)/);
+            if (jMatch) {
+                const d = new Date(jMatch[1].trim());
+                if (!isNaN(d.getTime())) data.joinYear = d.getFullYear().toString();
+            }
+        }
+
+        // Following - count blocks in Following.txt
+        const followingFile = findFile("Following.txt");
+        if (followingFile) {
+            const content = await zip.files[followingFile].async("string");
+            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+            data.following = blocks.length;
         }
 
         // Yearly Aggregation (Parity Check)
