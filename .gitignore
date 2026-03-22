@@ -1,0 +1,5 @@
+node_modules/
+test_data/
+test_parse.js
+.DS_Store
+Thumbs.db
