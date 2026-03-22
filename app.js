@@ -137,6 +137,15 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
             });
         }
 
+        // 4. Watch History
+        const watchFile = findFile("Your Activity/Watch History.txt") || findFile("Watch History.txt");
+        if (watchFile) {
+            const content = await zip.files[watchFile].async("string");
+            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+            data.stats.totalWatches = blocks.length;
+            data.stats.totalWatchHours = Math.round((blocks.length * 15) / 3600);
+        }
+
         wrappedData = data;
         status.innerText = "Data processed successfully!";
         startBtn.style.display = "inline-block";
@@ -236,6 +245,7 @@ function initializeData() {
 
     // Summary screen
     document.getElementById('sum-watches').innerText = wrappedData.stats.totalWatches.toLocaleString();
+    document.getElementById('sum-hours').innerText = wrappedData.stats.totalWatchHours.toLocaleString();
     document.getElementById('sum-likes').innerText = wrappedData.stats.totalLikes.toLocaleString();
     document.getElementById('sum-comments').innerText = wrappedData.stats.totalComments.toLocaleString();
     document.getElementById('sum-reposts').innerText = wrappedData.stats.totalReposts.toLocaleString();

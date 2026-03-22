@@ -256,6 +256,15 @@ function SlideUpload({ onDataParsed, onNext }) {
           data.firstRepost = firstRepost;
       }
 
+      // 5. Watch History
+      const watchFile = findFile("Your Activity/Watch History.txt") || findFile("Watch History.txt");
+      if (watchFile) {
+          const content = await zip.files[watchFile].async("string");
+          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
+          data.totalWatches = blocks.length;
+          data.totalWatchHours = Math.round((blocks.length * 15) / 3600);
+      }
+
       onDataParsed(data);
       onNext();
     } catch (err) {
@@ -364,8 +373,8 @@ function SlideStats({ data }) {
         {[
           { val: data.totalLikes, label: "Videos liked", icon: "🤍" },
           { val: data.following, label: "Following", icon: "➕" },
-          { val: 0, label: "Video views", icon: "👁️" },
-          { val: 0, label: "Shares", icon: "🔗" },
+          { val: data.totalWatches, label: "Videos watched", icon: "👁️" },
+          { val: data.totalWatchHours, label: "Hours watched", icon: "⏳" },
         ].map(({ val, label, icon }) => (
           <div key={label} style={glassStyle}>
             <div style={{ fontSize: 24 }}>{icon}</div>
