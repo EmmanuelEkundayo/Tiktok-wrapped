@@ -117,6 +117,7 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
             const content = await zip.files[repostsFile].async("string");
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
             data.stats.totalReposts = blocks.length;
+            data.stats.totalRepostHours = Math.round((blocks.length * 15) / 3600);
 
             let earliestR = Infinity;
             blocks.forEach(b => {
@@ -144,6 +145,40 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
             const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
             data.stats.totalWatches = blocks.length;
             data.stats.totalWatchHours = Math.round((blocks.length * 15) / 3600);
+        }
+
+        // 5. Profile Info
+        const profileFile = findFile("Profile/Profile Info.txt") || findFile("Profile Info.txt");
+        if (profileFile) {
+            const content = await zip.files[profileFile].async("string");
+            const uMatch = content.match(/Username:\s*(.*)/);
+            if (uMatch) data.username = "@" + uMatch[1].trim();
+            const jMatch = content.match(/Registration Date:\s*(.*)/);
+            if (jMatch) data.joinYear = new Date(jMatch[1].trim()).getFullYear();
+        }
+
+        // 6. Best Friend (from comments)
+        const commentsFile2 = findFile("Comments/Comments.txt") || findFile("Comments.txt");
+        if (commentsFile2) {
+             const content = await zip.files[commentsFile2].async("string");
+             const wordCounts = {};
+             const words = content.toLowerCase().match(/\w+/g);
+             if (words) {
+                 words.forEach(w => { if (w.length > 4) wordCounts[w] = (wordCounts[w] || 0) + 1; });
+                 data.bestFriend = Object.entries(wordCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || "...";
+             }
+        }
+
+        // Personality
+        if (data.stats.totalWatches > 10000) {
+            data.personality = "The Scroll-a-holic";
+            data.personalityDesc = "Your thumb is basically an Olympian at this point.";
+        } else if (data.stats.totalComments > 500) {
+            data.personality = "The Social Butterfly";
+            data.personalityDesc = "TikTok isn't just an app for you, it's a conversation.";
+        } else {
+            data.personality = "The Zen Viewer";
+            data.personalityDesc = "You watch, you enjoy, you keep it simple.";
         }
 
         wrappedData = data;
@@ -242,6 +277,12 @@ function initializeData() {
         }
         busiestContainer.innerHTML = html;
     }
+
+    // New Slides
+    document.getElementById('best-friend-name').innerText = wrappedData.bestFriend || "...";
+    document.getElementById('join-year-display').innerText = wrappedData.joinYear || "2021";
+    document.getElementById('personality-name').innerText = wrappedData.personality || "The Wrapped Explorer";
+    document.getElementById('personality-desc').innerText = wrappedData.personalityDesc || "You've found your digital groove.";
 
     // Summary screen
     document.getElementById('sum-watches').innerText = wrappedData.stats.totalWatches.toLocaleString();

@@ -232,6 +232,7 @@ function SlideUpload({ onDataParsed, onNext }) {
           const content = await zip.files[repostsFile].async("string");
           const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
           data.totalReposts = blocks.length;
+          data.totalRepostHours = Math.round((blocks.length * 15) / 3600);
           
           let earliestDate = Infinity;
           let firstRepost = null;
@@ -264,6 +265,25 @@ function SlideUpload({ onDataParsed, onNext }) {
           data.totalWatches = blocks.length;
           data.totalWatchHours = Math.round((blocks.length * 15) / 3600);
       }
+
+      // 6. Profile Info
+      const profileFile = findFile("Profile/Profile Info.txt") || findFile("Profile Info.txt");
+      if (profileFile) {
+          const content = await zip.files[profileFile].async("string");
+          const usernameMatch = content.match(/Username:\s*(.*)/);
+          if (usernameMatch) data.username = "@" + usernameMatch[1].trim();
+          
+          const joinDateMatch = content.match(/Registration Date:\s*(.*)/);
+          if (joinDateMatch) {
+              const d = new Date(joinDateMatch[1].trim());
+              if (!isNaN(d.getTime())) data.joinYear = d.getFullYear().toString();
+          }
+      }
+
+      // Determine Personality Persona
+      if (data.totalWatches > 10000) data.personality = "The Scroll-a-holic";
+      else if (data.totalComments > 500) data.personality = "The Social Butterfly";
+      else data.personality = "The Zen Viewer";
 
       onDataParsed(data);
       onNext();
@@ -552,10 +572,86 @@ function SlideFinal({ data }) {
 }
 
 // Minimal placeholder slides for required structure
-function SlideBestFriend() { return <div style={{ color: '#fff', textAlign: 'center', paddingTop: 100 }}>👯 Slide Coming Soon</div>; }
-function SlideFollowing() { return <div style={{ color: '#fff', textAlign: 'center', paddingTop: 100 }}>📱 Slide Coming Soon</div>; }
-function SlideJourney() { return <div style={{ color: '#fff', textAlign: 'center', paddingTop: 100 }}>📅 Slide Coming Soon</div>; }
-function SlidePersonality() { return <div style={{ color: '#fff', textAlign: 'center', paddingTop: 100 }}>🧛 Slide Coming Soon</div>; }
+function SlideBestFriend({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "80px 28px 0" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>
+        Circle ⭕
+      </p>
+      <h2 style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1.2, marginBottom: 32 }}>
+        Your TikTok Soulmate
+      </h2>
+      <div style={{ ...glassStyle, padding: "40px 20px" }}>
+        <div style={{ fontSize: 48, fontWeight: 900, color: "#fff" }}>{data.topWords[0] || "..."}</div>
+        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, marginTop: 16 }}>
+          You've mentioned them enough to make it official.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SlideFollowing({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "80px 28px 0" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>
+        Network 📶
+      </p>
+      <h2 style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1.2, marginBottom: 32 }}>
+        Keeping Up
+      </h2>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 320, margin: "0 auto" }}>
+        <div style={glassStyle}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: "#fff" }}>{data.following.toLocaleString()}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>Following</div>
+        </div>
+        <div style={glassStyle}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: "#fff" }}>{data.totalReposts.toLocaleString()}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>Reposts</div>
+        </div>
+      </div>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 32 }}>
+        You're a curator of the highest order.
+      </p>
+    </div>
+  );
+}
+
+function SlideJourney({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "80px 28px 0" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>
+        Legacy 🏛️
+      </p>
+      <h2 style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1.2, marginBottom: 32 }}>
+        Since {data.joinYear}
+      </h2>
+      <div style={{ ...glassStyle, padding: "40px() 20px" }}>
+        <div style={{ fontSize: 24, fontWeight: 900, color: "#fff" }}>The Journey Started</div>
+        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, marginTop: 16 }}>
+          You've seen trends come and go, but your style is eternal.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SlidePersonality({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "100px 28px 0" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>
+        Identity 🧬
+      </p>
+      <div style={{ fontSize: 80, marginBottom: 20 }}>🌌</div>
+      <h2 style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.1, marginBottom: 16 }}>
+        {data.personality}
+      </h2>
+      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 18, lineHeight: 1.5, maxWidth: 300, margin: "0 auto" }}>
+        {data.totalWatchHours.toLocaleString()} hours of content later, you've found your digital groove.
+      </p>
+    </div>
+  );
+}
 
 const SLIDE_COMPONENTS = {
     upload: SlideUpload,
