@@ -12,6 +12,7 @@ const SLIDES = [
   { id: "following" },
   { id: "journey" },
   { id: "yearly" },
+  { id: "firsts" },
   { id: "personality" },
   { id: "final" },
 ];
@@ -283,7 +284,13 @@ function SlideUpload({ onDataParsed, onNext }) {
 
       // 7. Yearly Stats Aggregator
       const yearlyData = {};
-      const incrementYearly = (dateStr, type) => {
+      const extractDate = (block) => {
+          const m = block.match(/(Date|Creation Time|Timestamp):\s*([\d\-\:\s]+)/i);
+          return m ? m[2].trim() : null;
+      };
+
+      const incrementYearly = (block, type) => {
+          const dateStr = extractDate(block);
           if (!dateStr) return;
           const y = new Date(dateStr).getFullYear();
           if (isNaN(y)) return;
@@ -291,30 +298,17 @@ function SlideUpload({ onDataParsed, onNext }) {
           yearlyData[y][type]++;
       };
 
-      // Recalculate yearly from scratch for accuracy
       if (commentsFile) {
           const content = await zip.files[commentsFile].async("string");
-          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-          blocks.forEach(b => {
-              const dateStr = b.match(/Date:\s*(.*)/)?.[1];
-              if (dateStr) incrementYearly(dateStr, 'comments');
-          });
+          content.split(/\n\s*\n/).forEach(b => incrementYearly(b, 'comments'));
       }
       if (likesFile) {
           const content = await zip.files[likesFile].async("string");
-          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-          blocks.forEach(b => {
-              const dateStr = b.match(/Date:\s*(.*)/)?.[1];
-              if (dateStr) incrementYearly(dateStr, 'likes');
-          });
+          content.split(/\n\s*\n/).forEach(b => incrementYearly(b, 'likes'));
       }
       if (repostsFile) {
           const content = await zip.files[repostsFile].async("string");
-          const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-          blocks.forEach(b => {
-              const dateStr = b.match(/Creation Time:\s*(.*)/)?.[1];
-              if (dateStr) incrementYearly(dateStr, 'reposts');
-          });
+          content.split(/\n\s*\n/).forEach(b => incrementYearly(b, 'reposts'));
       }
       data.yearlyData = Object.entries(yearlyData).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
 
@@ -696,6 +690,40 @@ function SlideYearly({ data }) {
   );
 }
 
+function SlideFirsts({ data }) {
+  return (
+    <div style={{ textAlign: "center", padding: "80px 24px 0" }}>
+      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", marginBottom: 16 }}>
+        Milestones ✨
+      </p>
+      <h2 style={{ fontSize: 28, fontWeight: 900, color: "#fff", marginBottom: 32 }}>
+        Where it all began
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {data.firstLike && (
+          <a href={data.firstLike.link} target="_blank" rel="noreferrer" style={{ ...glassStyle, textDecoration: "none", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px" }}>
+            <span style={{ color: "#fff", fontWeight: 700 }}>❤️ First Like</span>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{new Date(data.firstLike.date).toLocaleDateString()}</span>
+          </a>
+        )}
+        {data.firstRepost && (
+          <a href={data.firstRepost.link} target="_blank" rel="noreferrer" style={{ ...glassStyle, textDecoration: "none", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px" }}>
+            <span style={{ color: "#fff", fontWeight: 700 }}>🔄 First Repost</span>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{new Date(data.firstRepost.date).toLocaleDateString()}</span>
+          </a>
+        )}
+        {data.firstComment && (
+          <div style={{ ...glassStyle, textAlign: "left", padding: "20px" }}>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 8, textTransform: "uppercase" }}>💬 First Comment</div>
+            <div style={{ color: "#fff", fontSize: 15, fontStyle: "italic", lineHeight: 1.4 }}>"{data.firstComment.text}"</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>{new Date(data.firstComment.date).toLocaleDateString()}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SlidePersonality({ data }) {
   return (
     <div style={{ textAlign: "center", padding: "100px 28px 0" }}>
@@ -724,6 +752,7 @@ const SLIDE_COMPONENTS = {
     following: SlideFollowing,
     journey: SlideJourney,
     yearly: SlideYearly,
+    firsts: SlideFirsts,
     personality: SlidePersonality,
     final: SlideFinal,
 };

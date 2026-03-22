@@ -204,7 +204,13 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
 
         // 7. Yearly Stats Aggregator
         const yearlyDataMap = {};
-        const incYearly = (dateStr, type) => {
+        const extractDate = (block) => {
+            const m = block.match(/(Date|Creation Time|Timestamp):\s*([\d\-\:\s]+)/i);
+            return m ? m[2].trim() : null;
+        };
+
+        const incYearly = (block, type) => {
+            const dateStr = extractDate(block);
             if (!dateStr) return;
             const y = new Date(dateStr).getFullYear();
             if (isNaN(y)) return;
@@ -214,27 +220,15 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
 
         if (commentsFile) {
             const content = await zip.files[commentsFile].async("string");
-            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            blocks.forEach(b => {
-                const dMatch = b.match(/Date:\s*(.*)/);
-                if (dMatch) incYearly(dMatch[1], 'comments');
-            });
+            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'comments'));
         }
         if (likesFile) {
             const content = await zip.files[likesFile].async("string");
-            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            blocks.forEach(b => {
-                const dMatch = b.match(/Date:\s*(.*)/);
-                if (dMatch) incYearly(dMatch[1], 'likes');
-            });
+            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'likes'));
         }
         if (repostsFile) {
             const content = await zip.files[repostsFile].async("string");
-            const blocks = content.split(/\n\s*\n/).filter(b => b.trim() !== '');
-            blocks.forEach(b => {
-                const dMatch = b.match(/Creation Time:\s*(.*)/);
-                if (dMatch) incYearly(dMatch[1], 'reposts');
-            });
+            content.split(/\n\s*\n/).forEach(b => incYearly(b, 'reposts'));
         }
         data.yearlyData = Object.entries(yearlyDataMap).sort((a,b) => a[0]-b[0]).map(([year, stats]) => ({ year, ...stats }));
 
@@ -251,7 +245,7 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
 });
 
 let currentSlide = 0; // 0 is the upload screen
-const totalSlides = 12; // 0 (upload) to 11 (summary)
+const totalSlides = 13; // 0 (upload) to 12 (summary)
 // wrappedData is already declared at the top of the file
 
 function updateProgress() {
@@ -449,6 +443,41 @@ function initializeData() {
     // Personality
     document.getElementById('personality-name').innerText = wrappedData.personality || "The Wrapped Explorer";
     document.getElementById('personality-desc').innerText = wrappedData.personalityDesc || "You've found your digital groove.";
+
+    // Firsts Slide
+    const firstsSlideContainer = document.getElementById('slide-firsts-container');
+    if (firstsSlideContainer) {
+        firstsSlideContainer.innerHTML = '';
+        if (wrappedData.firsts.like) {
+            const a = document.createElement('a');
+            a.href = wrappedData.firsts.like.link;
+            a.target = '_blank';
+            a.className = 'glass-panel';
+            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 20px; width: 100%;';
+            a.innerHTML = `<span style="color: #fff; font-weight: 700;">❤️ First Like</span><span style="color: rgba(255,255,255,0.5); font-size: 13px;">${new Date(wrappedData.firsts.like.date).toLocaleDateString()}</span>`;
+            firstsSlideContainer.appendChild(a);
+        }
+        if (wrappedData.firsts.repost) {
+            const a = document.createElement('a');
+            a.href = wrappedData.firsts.repost.link;
+            a.target = '_blank';
+            a.className = 'glass-panel';
+            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 20px; width: 100%;';
+            a.innerHTML = `<span style="color: #fff; font-weight: 700;">🔄 First Repost</span><span style="color: rgba(255,255,255,0.5); font-size: 13px;">${new Date(wrappedData.firsts.repost.date).toLocaleDateString()}</span>`;
+            firstsSlideContainer.appendChild(a);
+        }
+        if (wrappedData.firsts.comment) {
+            const div = document.createElement('div');
+            div.className = 'glass-panel';
+            div.style.cssText = 'text-align: left; padding: 20px; width: 100%;';
+            div.innerHTML = `
+                <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 8px; text-transform: uppercase;">💬 First Comment</div>
+                <div style="color: #fff; fontSize: 15px; font-style: italic; line-height: 1.4;">"${wrappedData.firsts.comment.text}"</div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 8px;">${new Date(wrappedData.firsts.comment.date).toLocaleDateString()}</div>
+            `;
+            firstsSlideContainer.appendChild(div);
+        }
+    }
 
     // Summary screen
     document.getElementById('sum-watches').innerText = wrappedData.stats.totalWatches.toLocaleString();
