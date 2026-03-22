@@ -85,57 +85,6 @@
                 </div>
                 <button class="btn mt-2 animate-up delay-3" onclick="nextSlide(5)">See your emojis</button>
             </div>
-        </section>
-
-        <!-- Slide 5: Top Emojis -->
-        <section class="slide" id="slide-5">
-            <div class="content glass-panel">
-                <h2 class="animate-up">Your favorite reactions.</h2>
-                <div class="emoji-container animate-up delay-1" id="emojis-container">
-                    <!-- Injected by JS -->
-                </div>
-                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(6)">See yearly
-                    breakdown</button>
-            </div>
-        </section>
-
-        <!-- Slide 6: Busiest Days -->
-        <section class="slide" id="slide-6">
-            <div class="content glass-panel">
-                <h2 class="animate-up">Your Busiest Days.</h2>
-                <div class="firsts-grid animate-up delay-1" id="busiest-container">
-                    <!-- Injected by JS -->
-                </div>
-                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(7)">See yearly
-                    breakdown</button>
-            </div>
-        </section>
-
-        <!-- Slide 7: Yearly Breakdown -->
-        <section class="slide" id="slide-7">
-            <div class="content glass-panel yearly-panel">
-                <h2 class="animate-up">A year by year look.</h2>
-                <div class="yearly-grid animate-up delay-1" id="yearly-container">
-                    <!-- Injected by JS -->
-                </div>
-                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(8)">See your firsts</button>
-            </div>
-        </section>
-
-        <!-- Slide 8: The Firsts -->
-        <section class="slide" id="slide-8">
-            <div class="content glass-panel">
-                <h2 class="animate-up">Where it all began.</h2>
-                <div class="firsts-grid animate-up delay-1" id="firsts-container">
-                    <!-- Injected by JS -->
-                </div>
-                <button class="btn full-width mt-2 animate-up delay-2" onclick="nextSlide(11)">Finish</button>
-            </div>
-        </section>
-
-        <!-- Slide Best Friend -->
-        <section class="slide" id="slide-9">
-            <div class="content glass-panel" id="best-friend-container">
                 <p class="animate-up">Circle ⭕</p>
                 <h2 class="animate-up delay-1">Your TikTok Soulmate</h2>
                 <div class="number animate-up delay-2" id="best-friend-name">...</div>
@@ -143,8 +92,52 @@
             </div>
         </section>
 
-        <!-- Slide Journey/Legacy -->
-        <section class="slide" id="slide-10">
+        <!-- Slide 5: Words -->
+        <section class="slide" id="slide-5">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Lexicon 🗣️</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Words that defined<br>your TikTok era</h2>
+                <div class="glass-panel" id="words-cloud-container" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Busiest Day -->
+        <section class="slide" id="slide-6">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Chaos 📅</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Your most active day</h2>
+                <div class="glass-panel" style="padding: 2.5rem 1.25rem;">
+                    <div style="font-size: 3rem; font-weight: 900;" id="busiest-day-name">Loading...</div>
+                    <div style="font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-top: 0.75rem;">
+                        <strong id="busiest-day-count">0</strong> comments in 24h
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Following -->
+        <section class="slide" id="slide-7">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;">Network 📶</p>
+                <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin: 2rem 0;">Keeping Up</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 320px; margin: 0 auto;">
+                    <div class="glass-panel">
+                        <div style="font-size: 2rem; font-weight: 900;" id="stats-following">0</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Following</div>
+                    </div>
+                    <div class="glass-panel">
+                        <div style="font-size: 2rem; font-weight: 900;" id="stats-reposts">0</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px;">Reposts</div>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 2rem;">You're a curator of the highest order.</p>
+            </div>
+        </section>
+
+        <!-- Slide 8: Journey -->
+        <section class="slide" id="slide-8">
             <div class="content glass-panel">
                 <p class="animate-up">Legacy 🏛️</p>
                 <h2 class="animate-up delay-1">Since <span id="join-year-display">2021</span></h2>
@@ -153,34 +146,35 @@
             </div>
         </section>
 
-        <!-- Slide Personality -->
-        <section class="slide" id="slide-11">
-            <div class="content glass-panel">
-                <p class="animate-up">Identity 🧬</p>
-                <div style="font-size: 5rem; margin-bottom: 2rem;">🌌</div>
-                <h2 class="animate-up delay-1" id="personality-name">The Wrapped Explorer</h2>
-                <p class="animate-up delay-2" id="personality-desc">You've found your digital groove.</p>
-                <button class="btn full-width mt-2 animate-up delay-3" onclick="nextSlide(12)">Timeline</button>
-            </div>
-        </section>
-
-        <!-- Slide Yearly Timeline -->
-        <section class="slide" id="slide-12">
-            <div class="content glass-panel" style="overflow-y: auto; max-height: 80vh;">
-                <p class="animate-up">Timeline ⏳</p>
-                <h2 class="animate-up delay-1">A Year by Year Look</h2>
-                <div id="yearly-timeline-container" class="animate-up delay-2" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+        <!-- Slide 9: Yearly Timeline -->
+        <section class="slide" id="slide-9">
+            <div class="content" style="overflow-y: auto; max-height: 80vh; padding: 2rem 0.5rem;">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Timeline ⏳</p>
+                <h2 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 1.5rem;">A Year by Year Look</h2>
+                <div id="yearly-timeline-container" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
                     <!-- Injected by JS -->
                 </div>
-                <button class="btn full-width mt-2 animate-up delay-3" onclick="nextSlide(13)">Final Wrap</button>
             </div>
         </section>
 
-        <!-- Slide 13: Summary -->
-        <section class="slide" id="slide-13">
+        <!-- Slide 10: Personality -->
+        <section class="slide" id="slide-10">
+            <div class="content">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Identity 🧬</p>
+                <div style="font-size: 5rem; margin-bottom: 1.5rem;">🌌</div>
+                <h2 style="font-size: 2.25rem; font-weight: 900; line-height: 1.1; margin-bottom: 1rem;" id="personality-name">The Wrapped Explorer</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; line-height: 1.5; max-width: 300px; margin: 0 auto;" id="personality-desc">You've found your digital groove.</p>
+            </div>
+        </section>
+
+        <!-- Slide 11: Summary -->
+        <section class="slide" id="slide-11">
             <div class="content glass-panel summary-panel">
                 <h1 class="animate-up">That's a Wrap!</h1>
-                <p class="animate-up delay-1">Thanks for sharing your TikTok journey.</p>
+                <p class="animate-up delay-1" id="final-summary-text" style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+                    You've dropped 0 comments and liked 0 videos. You define the culture.
+                </p>
+                
                 <div class="summary-grid animate-up delay-2">
                     <div class="stat"><span id="sum-watches">0</span><br><small>Watches</small></div>
                     <div class="stat"><span id="sum-hours">0</span><br><small>Hours</small></div>

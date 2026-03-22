@@ -16,12 +16,30 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
         const zip = await window.JSZip.loadAsync(file);
         
         const data = {
-            stats: { totalWatches: 0, totalWatchHours: 0, totalLikes: 0, totalComments: 0, totalReposts: 0, totalRepostHours: 0 },
-            firsts: {},
-            commonWords: [],
-            commonEmojis: [],
-            busiestDays: {},
-            yearlyBreakdown: {}
+            username: "@User",
+            stats: {
+                totalLikes: 0,
+                totalComments: 0,
+                totalWatches: 0,
+                totalWatchHours: 0,
+                totalReposts: 0,
+                totalRepostHours: 0,
+                following: 0
+            },
+            firsts: {
+                like: null,
+                comment: null,
+                repost: null
+            },
+            monthlyData: {},
+            emojis: [],
+            words: [],
+            busiestDays: [],
+            personality: "The Wrapped Explorer",
+            personalityDesc: "You've found your digital groove.",
+            bestFriend: "...",
+            joinYear: "2021",
+            yearlyData: []
         };
 
         const findFile = (name) => Object.keys(zip.files).find(f => f.includes(name));
@@ -62,12 +80,12 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
                 }
             });
 
-            data.commonEmojis = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1]).slice(0,5).map(e => ({emoji: e[0], count: e[1]}));
+            data.emojis = Object.entries(emojiCounts).sort((a,b) => b[1]-a[1]).slice(0,5).map(e => ({char: e[0], count: e[1]}));
             let maxC = 0, bDay = "";
-            let earliestC = Infinity;
             Object.entries(dailyComments).forEach(([d, c]) => { if (c > maxC) { maxC = c; bDay = d; } });
-            data.busiestDays.comments = { day: bDay, count: maxC };
+            if (bDay) data.busiestDays.push({ day: bDay, count: maxC });
 
+            let earliestC = Infinity;
             blocks.forEach(b => {
                 const lines = b.split('\n');
                 let dStr = "", cStr = "";
@@ -155,6 +173,8 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
             if (uMatch) data.username = "@" + uMatch[1].trim();
             const jMatch = content.match(/Registration Date:\s*(.*)/);
             if (jMatch) data.joinYear = new Date(jMatch[1].trim()).getFullYear();
+            const fMatch = content.match(/Following:\s*(\d+)/);
+            if (fMatch) data.stats.following = parseInt(fMatch[1], 10);
         }
 
         // 6. Best Friend (from comments)
@@ -162,10 +182,11 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
         if (commentsFile2) {
              const content = await zip.files[commentsFile2].async("string");
              const wordCounts = {};
-             const words = content.toLowerCase().match(/\w+/g);
+             const words = content.toLowerCase().match(/\b\w{5,}\b/g); // Words with 5 or more characters
              if (words) {
-                 words.forEach(w => { if (w.length > 4) wordCounts[w] = (wordCounts[w] || 0) + 1; });
-                 data.bestFriend = Object.entries(wordCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || "...";
+                 words.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
+                 data.words = Object.entries(wordCounts).sort((a,b) => b[1]-a[1]).slice(0,10).map(([word, count]) => ({word, count}));
+                 data.bestFriend = data.words[0]?.word || "...";
              }
         }
 
@@ -229,15 +250,86 @@ document.getElementById('zip-upload').addEventListener('change', async (e) => {
     }
 });
 
-window.nextSlide = function (slideIndex) {
+let currentSlide = 0; // 0 is the upload screen
+const totalSlides = 12; // 0 (upload) to 11 (summary)
+// wrappedData is already declared at the top of the file
+
+function updateProgress() {
+    const container = document.getElementById('progress-bar-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Only show segments if we've started the tour (Slide 1+)
+    if (currentSlide === 0) return;
+
+    for (let i = 1; i < totalSlides; i++) {
+        const segment = document.createElement('div');
+        segment.style.flex = '1';
+        segment.style.height = '2px';
+        segment.style.borderRadius = '2px';
+        segment.style.background = i <= currentSlide ? '#fff' : 'rgba(255,255,255,0.2)';
+        segment.style.transition = 'background 0.3s ease';
+        container.appendChild(segment);
+    }
+}
+
+function showSlide(index) {
+    if (index < 0 || index >= totalSlides) return;
+    
     const slides = document.querySelectorAll('.slide');
     slides.forEach(slide => slide.classList.remove('active'));
-    const targetSlide = document.getElementById(`slide-${slideIndex}`);
-    if (targetSlide) {
-        targetSlide.classList.add('active');
-        animateNumbers(targetSlide);
+    
+    const target = document.getElementById(`slide-${index}`);
+    if (target) {
+        target.classList.add('active');
+        currentSlide = index;
+        updateProgress();
+        document.getElementById('slide-counter').innerText = `${currentSlide} / ${totalSlides - 1}`;
+        animateNumbers(target); // Call animateNumbers for the new slide
     }
-};
+}
+
+function nextSlide() {
+    if (currentSlide > 0 && currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+    if (currentSlide > 1) showSlide(currentSlide - 1); // Don't go back to slide 0 (upload screen)
+}
+
+// Global Nav Listeners
+document.getElementById('tap-left').addEventListener('click', (e) => {
+    if (currentSlide > 0) prevSlide();
+});
+
+document.getElementById('tap-right').addEventListener('click', (e) => {
+    if (currentSlide > 0) nextSlide();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (wrappedData) { // Only allow navigation after data is loaded
+        if (e.key === 'ArrowRight') {
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            prevSlide();
+        }
+    }
+});
+
+// Initial call to update progress bar (will be empty until first slide)
+updateProgress();
+
+// The old window.nextSlide is replaced by showSlide, nextSlide, prevSlide
+// window.nextSlide = function (slideIndex) {
+//     const slides = document.querySelectorAll('.slide');
+//     slides.forEach(slide => slide.classList.remove('active'));
+//     const targetSlide = document.getElementById(`slide-${slideIndex}`);
+//     if (targetSlide) {
+//         targetSlide.classList.add('active');
+//         animateNumbers(targetSlide);
+//     }
+// };
 
 function animateNumbers(slide) {
     if (!wrappedData) return;
@@ -269,80 +361,94 @@ function formatDateFriendly(dateStr) {
 function initializeData() {
     if (!wrappedData) return;
 
-    // Top Emojis
-    const emojisContainer = document.getElementById('emojis-container');
-    if (emojisContainer && wrappedData.commonEmojis) {
-        let html = '<div style="font-size: 3rem; display: flex; justify-content: center; gap: 20px;">';
-        wrappedData.commonEmojis.forEach(e => {
-            html += `<div title="Used ${e.count} times">${e.emoji}</div>`;
+    // Intro
+    document.getElementById('intro-username').innerText = wrappedData.username;
+    document.getElementById('intro-name').innerText = wrappedData.username.replace('@', '');
+    document.getElementById('intro-likes').innerText = wrappedData.stats.totalLikes.toLocaleString();
+    document.getElementById('intro-comments').innerText = wrappedData.stats.totalComments.toLocaleString();
+
+    // Stats Slide
+    document.getElementById('stats-total-comments').innerText = wrappedData.stats.totalComments.toLocaleString();
+    document.getElementById('stats-total-likes').innerText = wrappedData.stats.totalLikes.toLocaleString();
+    document.getElementById('stats-total-watch-hours').innerText = wrappedData.stats.totalWatchHours.toLocaleString();
+    document.getElementById('stats-total-repost-hours').innerText = wrappedData.stats.totalRepostHours.toLocaleString();
+
+
+    // Emojis
+    const emojiContainer = document.getElementById('emoji-list-container');
+    if (emojiContainer) {
+        emojiContainer.innerHTML = '';
+        wrappedData.emojis.slice(0, 4).forEach((e, i) => {
+            const div = document.createElement('div');
+            div.className = 'glass-panel';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+            div.style.padding = '1rem 1.5rem';
+            div.innerHTML = `
+                <span style="font-size: 2rem;">${e.char}</span>
+                <span style="font-size: 1.25rem; font-weight: 700;">${e.count.toLocaleString()}</span>
+            `;
+            emojiContainer.appendChild(div);
         });
-        html += '</div>';
-        emojisContainer.innerHTML = html;
     }
 
-    // Yearly Breakdown
-    const yearlyContainer = document.getElementById('yearly-container');
-    if (yearlyContainer && wrappedData.yearlyBreakdown) {
-        const years = Object.keys(wrappedData.yearlyBreakdown).sort();
-        let html = '';
-        years.forEach(year => {
-            const d = wrappedData.yearlyBreakdown[year];
-            html += `
-            <div class="year-card">
-                <h3>${year}</h3>
-                <p>❤️ ${d.likes.toLocaleString()}</p>
-                <p>🗣️ ${d.comments.toLocaleString()}</p>
-                <p>🔄 ${d.reposts.toLocaleString()}</p>
-            </div>`;
-        });
-        yearlyContainer.innerHTML = html;
-    }
-
-    // Busiest Days
-    const busiestContainer = document.getElementById('busiest-container');
-    if (busiestContainer && wrappedData.busiestDays) {
-        let html = '';
-        const b = wrappedData.busiestDays;
-        if (b.comments && b.comments.day) {
-            html += `
-            <div class="first-card comment-card">
-                <h3>Most Commented In A Day</h3>
-                <p><strong>${formatDateFriendly(b.comments.day)}</strong></p>
-                <p>${b.comments.count.toLocaleString()} comments made</p>
-            </div>`;
-        }
-        busiestContainer.innerHTML = html;
-    }
-
-    // New Slides
+    // Best Friend
     document.getElementById('best-friend-name').innerText = wrappedData.bestFriend || "...";
-    document.getElementById('join-year-display').innerText = wrappedData.joinYear || "2021";
-    document.getElementById('personality-name').innerText = wrappedData.personality || "The Wrapped Explorer";
-    document.getElementById('personality-desc').innerText = wrappedData.personalityDesc || "You've found your digital groove.";
 
-    // Yearly Timeline
+    // Words Cloud
+    const wordCloud = document.getElementById('words-cloud-container');
+    if (wordCloud) {
+        wordCloud.innerHTML = '';
+        wrappedData.words.slice(0, 10).forEach(w => {
+            const span = document.createElement('span');
+            span.style.fontSize = `${1.2 + Math.random()}rem`;
+            span.style.fontWeight = '700';
+            span.style.color = `rgba(255,255,255,${0.5 + Math.random() * 0.5})`;
+            span.innerText = w.word;
+            wordCloud.appendChild(span);
+        });
+    }
+
+    // Busiest Day
+    if (wrappedData.busiestDays && wrappedData.busiestDays[0]) {
+        document.getElementById('busiest-day-name').innerText = formatDateFriendly(wrappedData.busiestDays[0].day);
+        document.getElementById('busiest-day-count').innerText = wrappedData.busiestDays[0].count.toLocaleString();
+    }
+
+    // Following
+    document.getElementById('stats-following').innerText = wrappedData.stats.following.toLocaleString();
+    document.getElementById('stats-reposts').innerText = wrappedData.stats.totalReposts.toLocaleString();
+
+    // Journey
+    document.getElementById('join-year-display').innerText = wrappedData.joinYear || "2021";
+
+    // Timeline
     const timelineContainer = document.getElementById('yearly-timeline-container');
     if (timelineContainer && wrappedData.yearlyData) {
         timelineContainer.innerHTML = '';
         wrappedData.yearlyData.forEach(y => {
             const item = document.createElement('div');
             item.className = 'glass-panel';
-            item.style.padding = '1rem';
-            item.style.marginBottom = '0.5rem';
+            item.style.padding = '0.75rem';
             item.style.width = '100%';
             item.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-size: 1.25rem; font-weight: 900;">${y.year}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 1.1rem; font-weight: 900;">${y.year}</span>
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">🔄 ${y.reposts.toLocaleString()}</span>
                 </div>
-                <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: rgba(255,255,255,0.7);">
-                    <span>❤️ <strong>${y.likes.toLocaleString()}</strong></span>
-                    <span>🗣️ <strong>${y.comments.toLocaleString()}</strong></span>
-                    <span>🔄 <strong>${y.reposts.toLocaleString()}</strong></span>
+                <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+                    <span>❤️ ${y.likes.toLocaleString()}</span>
+                    <span>🗣️ ${y.comments.toLocaleString()}</span>
                 </div>
             `;
             timelineContainer.appendChild(item);
         });
     }
+
+    // Personality
+    document.getElementById('personality-name').innerText = wrappedData.personality || "The Wrapped Explorer";
+    document.getElementById('personality-desc').innerText = wrappedData.personalityDesc || "You've found your digital groove.";
 
     // Summary screen
     document.getElementById('sum-watches').innerText = wrappedData.stats.totalWatches.toLocaleString();
@@ -350,33 +456,47 @@ function initializeData() {
     document.getElementById('sum-likes').innerText = wrappedData.stats.totalLikes.toLocaleString();
     document.getElementById('sum-comments').innerText = wrappedData.stats.totalComments.toLocaleString();
     document.getElementById('sum-reposts').innerText = wrappedData.stats.totalReposts.toLocaleString();
+    
+    document.getElementById('final-summary-text').innerHTML = `
+        You've dropped <strong>${wrappedData.stats.totalComments.toLocaleString()}</strong> comments 
+        and spent <strong>${wrappedData.stats.totalWatchHours.toLocaleString()}</strong> hours watching. 
+        You define the culture.
+    `;
 
-    // Add milestones to summary panel
-    const summaryPanel = document.querySelector('.summary-panel');
-    let memoriesHtml = '<div style="margin-top: 2rem; text-align: left; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">';
-    memoriesHtml += '<h3 style="font-size: 1rem; margin-bottom: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Interaction Milestones</h3>';
-    
-    if (wrappedData.firsts.like) {
-        memoriesHtml += `<a href="${wrappedData.firsts.like.link}" target="_blank" style="display: block; color: #fff; text-decoration: none; margin-bottom: 10px; font-size: 0.9rem;">🤍 Your First Like</a>`;
+    // Firsts
+    const firstsContainer = document.getElementById('firsts-container');
+    if (firstsContainer) {
+        firstsContainer.innerHTML = '';
+        if (wrappedData.firsts.like) {
+            const a = document.createElement('a');
+            a.href = wrappedData.firsts.like.link;
+            a.target = '_blank';
+            a.className = 'btn';
+            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 12px 20px; font-size: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 100%;';
+            a.innerHTML = `<span>❤️ Your First Like</span><span style="opacity: 0.5;">${new Date(wrappedData.firsts.like.date).toLocaleDateString()}</span>`;
+            firstsContainer.appendChild(a);
+        }
+        if (wrappedData.firsts.repost) {
+            const a = document.createElement('a');
+            a.href = wrappedData.firsts.repost.link;
+            a.target = '_blank';
+            a.className = 'btn';
+            a.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 12px 20px; font-size: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 100%;';
+            a.innerHTML = `<span>🔄 Your First Repost</span><span style="opacity: 0.5;">${new Date(wrappedData.firsts.repost.date).toLocaleDateString()}</span>`;
+            firstsContainer.appendChild(a);
+        }
+        if (wrappedData.firsts.comment) {
+            const div = document.createElement('div');
+            div.className = 'glass-panel';
+            div.style.cssText = 'text-align: left; padding: 12px 20px; width: 100%;';
+            div.innerHTML = `
+                <div style="font-size: 10px; opacity: 0.5; margin-bottom: 4px;">💬 YOUR FIRST COMMENT</div>
+                <div style="font-size: 13px; font-style: italic; line-height: 1.4;">"${wrappedData.firsts.comment.text}"</div>
+                <div style="font-size: 10px; opacity: 0.4; margin-top: 6px;">${new Date(wrappedData.firsts.comment.date).toLocaleDateString()}</div>
+            `;
+            firstsContainer.appendChild(div);
+        }
     }
-    if (wrappedData.firsts.repost) {
-        memoriesHtml += `<a href="${wrappedData.firsts.repost.link}" target="_blank" style="display: block; color: #fff; text-decoration: none; margin-bottom: 10px; font-size: 0.9rem;">🔄 Your First Repost</a>`;
-    }
-    if (wrappedData.firsts.comment) {
-        memoriesHtml += `<div style="color: #fff; font-size: 0.9rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <small style="color: #666;">FIRST COMMENT (${new Date(wrappedData.firsts.comment.date).toLocaleDateString()}):</small><br>
-            <i style="color: #ccc;">"${wrappedData.firsts.comment.text}"</i>
-        </div>`;
-    }
-    memoriesHtml += '</div>';
-    
-    const existingMemories = summaryPanel.querySelector('.memories-container');
-    if (existingMemories) existingMemories.remove();
-    
-    const div = document.createElement('div');
-    div.className = 'memories-container';
-    div.innerHTML = memoriesHtml;
-    summaryPanel.insertBefore(div, summaryPanel.querySelector('button'));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
